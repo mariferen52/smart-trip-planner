@@ -1,0 +1,28 @@
+.root {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10px;
+}
+
+#navbar{
+    -fx-border-style: solid;
+    -fx-border-width: 0 2px 0 0;
+}
+
+
+
+#close{
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-text-fill: #FF0000FF;
+    -fx-border-style: solid;
+    -fx-border-width: 2px 0 0 0;
+}
+
+#close:hover{
+    -fx-background-color: #FF0000FF;
+    -fx-text-fill: #fff;
+    -fx-background-radius: 0 0 0 10px;
+}
