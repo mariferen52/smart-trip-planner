@@ -2,8 +2,9 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
-<GridPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="506.0" prefWidth="900.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.MainController">
+<GridPane fx:id="mainScene" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.MainController">
      <columnConstraints>
          <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0" />
          <ColumnConstraints hgrow="ALWAYS" percentWidth="90.0" />
@@ -12,19 +13,31 @@
          <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
      </rowConstraints>
       <children>
-         <GridPane fx:id="navbar" alignment="BOTTOM_CENTER" maxWidth="Infinity" maxHeight="Infinity" stylesheets="@style.css">
+         <GridPane fx:id="navbar" alignment="BOTTOM_CENTER" maxHeight="Infinity" maxWidth="Infinity" stylesheets="@style.css">
              <rowConstraints>
-                 <RowConstraints percentHeight="90.0" vgrow="ALWAYS" />
+                 <RowConstraints percentHeight="80.0" vgrow="ALWAYS" />
+                 <RowConstraints percentHeight="10.0" vgrow="ALWAYS" />
                  <RowConstraints percentHeight="10.0" vgrow="ALWAYS" />
              </rowConstraints>
             <children>
-                <Label fx:id="close" alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" maxHeight="Infinity" onMouseClicked="#close" stylesheets="@style.css" text="X" textAlignment="CENTER" textOverrun="CLIP" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" />
+                <Label fx:id="close" alignment="CENTER" contentDisplay="CENTER" maxHeight="Infinity" maxWidth="Infinity" onMouseClicked="#close" stylesheets="@style.css" text="X" textAlignment="CENTER" textOverrun="CLIP" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                <Label fx:id="setScreen" alignment="CENTER" contentDisplay="CENTER" maxHeight="Infinity" maxWidth="Infinity" onMouseClicked="#setScreen" stylesheets="@style.css" textAlignment="CENTER" textOverrun="CLIP" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+               <graphic>
+                  <Region fx:id="setScreenIcon"/>
+               </graphic></Label>
             </children>
+
+
+             <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
          </GridPane>
 
           <VBox alignment="CENTER" maxHeight="Infinity" GridPane.columnIndex="1">
+
               <children>
-                  <Label fx:id="welcomeText" text="Welcome to \nSmart Trip Planer" textAlignment="CENTER" textOverrun="CLIP" />
+                  <Label fx:id="welcomeText" alignment="CENTER" text="Welcome to Smart Trip Planer" textAlignment="CENTER" textOverrun="CLIP" />
               </children>
           </VBox>
 
