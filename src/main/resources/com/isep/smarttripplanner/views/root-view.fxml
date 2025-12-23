@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane fx:id="rootLayout" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@rootStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.RootController">
+<StackPane fx:id="rootLayout" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@rootStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.controller.RootController">
         <AnchorPane fx:id="mainContent">
             <children>
                 <Label text="Label" />

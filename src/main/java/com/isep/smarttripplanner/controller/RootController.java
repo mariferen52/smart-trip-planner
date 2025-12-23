@@ -1,4 +1,4 @@
-package com.isep.smarttripplanner;
+package com.isep.smarttripplanner.controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -86,12 +86,12 @@ public class RootController {
         rootLayout.heightProperty().addListener((obs, oldVal, newVal) -> {
             updateFontSize(newVal.doubleValue());
         });
-        StackPane.setMargin(mainContent, new Insets(0,0,0,0) );
+        StackPane.setMargin(mainContent, new Insets(0, 0, 0, 0));
         mainContent.translateXProperty().bind(sidebar.widthProperty());
         mainContent.prefWidthProperty().bind(rootLayout.widthProperty().subtract(sidebar.widthProperty()));
     }
 
-    private void setLabelSize(Label button, Region buttonIcon, double fontSize){
+    private void setLabelSize(Label button, Region buttonIcon, double fontSize) {
         double padding = fontSize / 1.5;
         buttonIcon.setStyle("-fx-min-height: " + fontSize + "px; " +
                 "-fx-min-width: " + fontSize + "px; " +
@@ -105,19 +105,19 @@ public class RootController {
         double padding = fontSize / 1.5;
         String paddingStyle = "-fx-padding: " + padding + " " + (padding * 1.5) + "px;";
 
-        setLabelSize(sideDrawer, sideDrawerIcon,  fontSize);
+        setLabelSize(sideDrawer, sideDrawerIcon, fontSize);
         setLabelSize(profile, profileIcon, fontSize);
         profileIcon.setScaleX(1.2);
         profileIcon.setScaleY(1.2);
-        setLabelSize(activeTrip, activeTripIcon, fontSize );
+        setLabelSize(activeTrip, activeTripIcon, fontSize);
         activeTripIcon.setScaleX(1.2);
         activeTripIcon.setScaleX(1.44);
 
-        setLabelSize(tripHistory, tripHistoryIcon,  fontSize);
+        setLabelSize(tripHistory, tripHistoryIcon, fontSize);
         tripHistoryIcon.setScaleX(1.2);
         tripHistoryIcon.setScaleY(1.2);
 
-        setLabelSize(totalBudget, totalBudgetIcon,  fontSize);
+        setLabelSize(totalBudget, totalBudgetIcon, fontSize);
         totalBudgetIcon.setScaleX(1.2);
         totalBudgetIcon.setScaleY(1.2);
 
@@ -158,25 +158,25 @@ public class RootController {
         }
     }
 
-    private void updateSideDrawer(Label sideDrawer){
+    private void updateSideDrawer(Label sideDrawer) {
         String bg = isExpanded ? "#000000" : "#ffffff";
         String text = isExpanded ? "#ffffff" : "#000000";
         double padding = fontSize / 1.5;
         sideDrawer.setStyle("-fx-font-size: " + fontSize + "; -fx-background-color: " + bg +
-                "; -fx-text-fill: " + text + "; -fx-background-radius: 9px 0px 0px 0px;" + "-fx-padding: " + padding + " " + (padding * 1.5) + "px;");
+                "; -fx-text-fill: " + text + "; -fx-background-radius: 9px 0px 0px 0px;" + "-fx-padding: " + padding
+                + " " + (padding * 1.5) + "px;");
         sideDrawerIcon.setStyle("-fx-min-height: " + fontSize + "px; " +
                 "-fx-min-width: " + fontSize + "px; " +
                 "-fx-max-height: " + fontSize + "px; " +
-                "-fx-max-width: " + fontSize + "px;"+ " -fx-background-color: " + text + ";");
+                "-fx-max-width: " + fontSize + "px;" + " -fx-background-color: " + text + ";");
     }
 
     @FXML
-    private void expandSideDrawer(){
+    private void expandSideDrawer() {
         double padding = fontSize / 2;
-        if(!isExpanded) {
+        if (!isExpanded) {
             isExpanded = true;
             updateSideDrawer(sideDrawer);
-
 
             mainContent.translateXProperty().unbind();
             mainContent.prefWidthProperty().unbind();
@@ -189,17 +189,17 @@ public class RootController {
             settings.setContentDisplay(ContentDisplay.LEFT);
             setScreen.setContentDisplay(ContentDisplay.LEFT);
 
-            sideDrawer.setGraphicTextGap(sideDrawer.getWidth()/3.2);
-            profile.setGraphicTextGap(profile.getWidth()/3.2);
-            activeTrip.setGraphicTextGap(activeTrip.getWidth()/3.2);
-            tripHistory.setGraphicTextGap(tripHistory.getWidth()/3.2);
-            totalBudget.setGraphicTextGap(totalBudget.getWidth()/3.2);
-            settings.setGraphicTextGap(settings.getWidth()/3.2);
-            setScreen.setGraphicTextGap(setScreen.getWidth()/3.2);
+            sideDrawer.setGraphicTextGap(sideDrawer.getWidth() / 3.2);
+            profile.setGraphicTextGap(profile.getWidth() / 3.2);
+            activeTrip.setGraphicTextGap(activeTrip.getWidth() / 3.2);
+            tripHistory.setGraphicTextGap(tripHistory.getWidth() / 3.2);
+            totalBudget.setGraphicTextGap(totalBudget.getWidth() / 3.2);
+            settings.setGraphicTextGap(settings.getWidth() / 3.2);
+            setScreen.setGraphicTextGap(setScreen.getWidth() / 3.2);
 
             close.setText("Close");
 
-        }else{
+        } else {
             isExpanded = false;
             updateSideDrawer(sideDrawer);
 
@@ -213,9 +213,7 @@ public class RootController {
             settings.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setScreen.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-
             close.setText("X");
-
 
         }
     }
