@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
+import com.isep.smarttripplanner.controller.RootController;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class MainApplication extends Application {
     }
 
     private void initRootLayout() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("root-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("views/root-view.fxml"));
         double screenWidth = Screen.getPrimary().getVisualBounds().getWidth() * 0.7;
         double screenHeight = screenWidth * (9.0 / 16.0);
         Scene scene = new Scene(fxmlLoader.load(), screenWidth, screenHeight);
