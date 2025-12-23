@@ -5,9 +5,12 @@
     -fx-background-radius: 10px;
 }
 
-#navbar{
+#sidebar{
+    -fx-font-weight: bold;
     -fx-border-style: solid;
+    -fx-background-color: #ffffff;
     -fx-border-width: 0 2px 0 0;
+    -fx-background-radius: 10px 0px 0px 10px;
 }
 
 /*Side Drawer*/
@@ -24,8 +27,19 @@
     -fx-max-height: 30px;
 }
 
+#sideDrawer:hover{
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-background-radius: 9px 0px 0px 0px;
+}
+
+#sideDrawer:hover #sideDrawerIcon{
+    -fx-background-color: #ffffff !important;
+}
+
 /*Profile*/
 #profile {
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-style: solid;
     -fx-border-width: 2px 0 0 0;
@@ -41,15 +55,17 @@
 }
 
 #profile:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
 }
 
 #profile:hover #profileIcon{
-    -fx-background-color: #ffffff;
+    -fx-background-color: #ffffff !important;
 }
 
 /*Active Trip*/
 #activeTrip{
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-style: solid;
     -fx-border-width: 2px 0 0 0;
@@ -64,16 +80,18 @@
 }
 
 #activeTrip:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
 }
 
 #activeTrip:hover #activeTripIcon{
-    -fx-background-color: #ffffff;
+    -fx-background-color: #ffffff !important;
 }
 
 
 /*Trip History*/
 #tripHistory{
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-style: solid;
     -fx-border-width: 2px 0 0 0;
@@ -89,16 +107,18 @@
 }
 
 #tripHistory:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
 }
 
 
 #tripHistory:hover #tripHistoryIcon{
-    -fx-background-color: #ffffff;
+    -fx-background-color: #ffffff !important;
 }
 
 /*Total Budget*/
 #totalBudget{
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-style: solid;
     -fx-border-width: 2px 0 2px 0;
@@ -114,16 +134,18 @@
 }
 
 #totalBudget:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
 }
 
 
 #totalBudget:hover #totalBudgetIcon{
-    -fx-background-color: #ffffff;
+    -fx-background-color: #ffffff !important;
 }
 
 /*Settings Button*/
 #settings{
+    -fx-font-weight: bold;
     -fx-border-width: 2px 0 0 0;
     -fx-border-style: solid;
     -fx-cursor: hand;
@@ -139,15 +161,17 @@
 }
 
 #settings:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
 }
 
 #settings:hover #settingsIcon{
-    -fx-background-color: #ffffff;
+    -fx-background-color: #ffffff !important;
 }
 
 /*Set Screen Button*/
 #setScreen{
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-style: solid;
     -fx-border-width: 2px 0 0 0;
@@ -155,6 +179,7 @@
 
 #setScreen:hover{
     -fx-background-color: #ff9100;
+    -fx-text-fill: #ffffff;
 }
 
 #setScreen:hover #setScreenIcon{

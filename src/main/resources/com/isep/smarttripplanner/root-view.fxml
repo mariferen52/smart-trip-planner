@@ -1,61 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="rootLayout" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@rootStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.RootController">
-    <left>
-        <VBox fx:id="navbar" alignment="BOTTOM_CENTER" BorderPane.alignment="CENTER">
+<StackPane fx:id="rootLayout" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@rootStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.RootController">
+        <AnchorPane fx:id="mainContent">
             <children>
-
-                <Label fx:id="sideDrawer" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" VBox.vgrow="ALWAYS" >
-                    <graphic>
-                        <Region fx:id="sideDrawerIcon"/>
-                    </graphic>
-                </Label>
-
-                <Label fx:id="profile" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="profileIcon" />
-                    </graphic>
-                </Label>
-
-                <Label fx:id="activeTrip" alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="activeTripIcon" />
-                    </graphic>
-                </Label>
-
-                <Label fx:id="tripHistory" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="tripHistoryIcon" />
-                    </graphic>
-                </Label>
-
-                <Label fx:id="totalBudget" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="totalBudgetIcon" />
-                    </graphic>
-                </Label>
-
-
-                <Region VBox.vgrow="ALWAYS" />
-
-                <Label fx:id="settings" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="settingsIcon" />
-                    </graphic>
-                </Label>
-
-                <Label fx:id="setScreen" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" onMouseClicked="#toggleScreen" VBox.vgrow="ALWAYS">
-                    <graphic>
-                        <Region fx:id="setScreenIcon" />
-                    </graphic>
-                </Label>
-
-                <Label fx:id="close" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" onMouseClicked="#close" text="X" textAlignment="CENTER" VBox.vgrow="ALWAYS" />
-
+                <Label text="Label" />
             </children>
-        </VBox>
-    </left>
-</BorderPane>
+            <StackPane.margin>
+                <Insets left="30.0" />
+            </StackPane.margin>
+        </AnchorPane>
+
+
+
+        <VBox fx:id="sidebar" alignment="CENTER_LEFT" maxWidth="-Infinity"  StackPane.alignment="CENTER_LEFT">
+          <children>
+
+              <Label fx:id="sideDrawer" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" onMouseClicked="#expandSideDrawer" text="Menu" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="sideDrawerIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="profile" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Profile" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="profileIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="activeTrip" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Trip" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="activeTripIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="tripHistory" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Trip History" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="tripHistoryIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="totalBudget" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Budget" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="totalBudgetIcon" />
+                  </graphic>
+              </Label>
+
+
+              <Region VBox.vgrow="ALWAYS" />
+
+              <Label fx:id="settings" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Settings" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="settingsIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="setScreen" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" onMouseClicked="#toggleScreen" text="Fullscreen" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="setScreenIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="close" alignment="CENTER" contentDisplay="LEFT" maxWidth="Infinity" onMouseClicked="#close" text="X" textAlignment="CENTER" VBox.vgrow="ALWAYS" />
+
+          </children>
+      </VBox>
+
+</StackPane>
