@@ -1,7 +1,9 @@
 package com.isep.smarttripplanner.controller;
 
+import com.isep.smarttripplanner.MainApplication;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -10,6 +12,9 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import javafx.scene.input.MouseEvent;
+
+import java.io.IOException;
+import com.isep.smarttripplanner.controller.TripController;
 
 public class RootController {
 
@@ -22,6 +27,7 @@ public class RootController {
 
     private double fontSize;
 
+    private AnchorPane cachedHomeView;
     @FXML
     private StackPane rootLayout;
 
@@ -36,6 +42,12 @@ public class RootController {
 
     @FXML
     private Region sideDrawerIcon;
+
+    @FXML
+    private Label home;
+
+    @FXML
+    private Region homeIcon;
 
     @FXML
     private Label profile;
@@ -81,14 +93,37 @@ public class RootController {
     }
 
     @FXML
-    private void initialize() {
+    private void initialize() throws IOException {
         this.isExpanded = false;
         rootLayout.heightProperty().addListener((obs, oldVal, newVal) -> {
             updateFontSize(newVal.doubleValue());
         });
-        StackPane.setMargin(mainContent, new Insets(0, 0, 0, 0));
-        mainContent.translateXProperty().bind(sidebar.widthProperty());
-        mainContent.prefWidthProperty().bind(rootLayout.widthProperty().subtract(sidebar.widthProperty()));
+
+        StackPane.setAlignment(mainContent, javafx.geometry.Pos.CENTER_LEFT);
+
+        StackPane.setMargin(mainContent, new Insets(0, 0, 0, sidebar.getWidth()));
+
+        sidebar.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isExpanded) {
+                StackPane.setMargin(mainContent, new Insets(0, 0, 0, newVal.doubleValue()));
+            }
+        });
+        homeView();
+    }
+
+    private void homeView() throws IOException {
+        if (cachedHomeView == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("views/home-view.fxml"));
+            cachedHomeView = fxmlLoader.load();
+            TripController controller = fxmlLoader.getController();
+            controller.getMainContent(mainContent);
+        }
+        mainContent.getChildren().setAll(cachedHomeView);
+
+        AnchorPane.setBottomAnchor(cachedHomeView, 0.0);
+        AnchorPane.setTopAnchor(cachedHomeView, 0.0);
+        AnchorPane.setLeftAnchor(cachedHomeView, 0.0);
+        AnchorPane.setRightAnchor(cachedHomeView, 0.0);
     }
 
     private void setLabelSize(Label button, Region buttonIcon, double fontSize) {
@@ -109,6 +144,9 @@ public class RootController {
         setLabelSize(profile, profileIcon, fontSize);
         profileIcon.setScaleX(1.2);
         profileIcon.setScaleY(1.2);
+
+        setLabelSize(home, homeIcon, fontSize);
+
         setLabelSize(activeTrip, activeTripIcon, fontSize);
         activeTripIcon.setScaleX(1.2);
         activeTripIcon.setScaleX(1.44);
@@ -125,6 +163,7 @@ public class RootController {
         setLabelSize(setScreen, setScreenIcon, fontSize);
 
         close.setStyle("-fx-font-size: " + fontSize + "px; " + paddingStyle);
+
     }
 
     @FXML
@@ -178,9 +217,7 @@ public class RootController {
             isExpanded = true;
             updateSideDrawer(sideDrawer);
 
-            mainContent.translateXProperty().unbind();
-            mainContent.prefWidthProperty().unbind();
-
+            home.setContentDisplay(ContentDisplay.LEFT);
             sideDrawer.setContentDisplay(ContentDisplay.LEFT);
             profile.setContentDisplay(ContentDisplay.LEFT);
             activeTrip.setContentDisplay(ContentDisplay.LEFT);
@@ -190,6 +227,7 @@ public class RootController {
             setScreen.setContentDisplay(ContentDisplay.LEFT);
 
             sideDrawer.setGraphicTextGap(sideDrawer.getWidth() / 3.2);
+            home.setGraphicTextGap(profile.getWidth() / 3.2);
             profile.setGraphicTextGap(profile.getWidth() / 3.2);
             activeTrip.setGraphicTextGap(activeTrip.getWidth() / 3.2);
             tripHistory.setGraphicTextGap(tripHistory.getWidth() / 3.2);
@@ -203,9 +241,8 @@ public class RootController {
             isExpanded = false;
             updateSideDrawer(sideDrawer);
 
-            mainContent.prefWidthProperty().bind(rootLayout.widthProperty().subtract(sidebar.widthProperty()));
-            mainContent.translateXProperty().bind(sidebar.widthProperty());
             sideDrawer.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            home.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             profile.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             activeTrip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             tripHistory.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -216,5 +253,10 @@ public class RootController {
             close.setText("X");
 
         }
+    }
+
+    @FXML
+    private void changeToHomeView() throws IOException {
+        homeView();
     }
 }

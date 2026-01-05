@@ -5,23 +5,22 @@
 <?import javafx.scene.layout.*?>
 
 <StackPane fx:id="rootLayout" maxHeight="Infinity" maxWidth="Infinity" onMouseDragged="#dragScreen" onMousePressed="#getScreenCoordinates" prefHeight="506.0" prefWidth="900.0" stylesheets="@rootStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.controller.RootController">
-        <AnchorPane fx:id="mainContent">
-            <children>
-                <Label text="Label" />
-            </children>
-            <StackPane.margin>
-                <Insets left="30.0" />
-            </StackPane.margin>
-        </AnchorPane>
+        <AnchorPane fx:id="mainContent" StackPane.alignment="CENTER_LEFT" />
 
 
 
-        <VBox fx:id="sidebar" alignment="CENTER_LEFT" maxWidth="-Infinity"  StackPane.alignment="CENTER_LEFT">
+        <VBox fx:id="sidebar" alignment="CENTER_LEFT" maxWidth="-Infinity" StackPane.alignment="CENTER_LEFT">
           <children>
 
               <Label fx:id="sideDrawer" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" onMouseClicked="#expandSideDrawer" text="Menu" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="sideDrawerIcon" />
+                  </graphic>
+              </Label>
+
+              <Label fx:id="home" onMouseClicked="#changeToHomeView" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Home" VBox.vgrow="ALWAYS">
+                  <graphic>
+                      <Region fx:id="homeIcon" />
                   </graphic>
               </Label>
 
