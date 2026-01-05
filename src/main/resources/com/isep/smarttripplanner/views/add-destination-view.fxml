@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane hgap="10.0" vgap="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isep.smarttripplanner.controller.AddDestinationController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <Label text="City:" />
+      <TextField fx:id="destinationName" promptText="City Name" GridPane.columnIndex="1" />
+      <Label text="Start Date:" GridPane.rowIndex="1" />
+      <DatePicker fx:id="startDate" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <Label text="End Date:" GridPane.rowIndex="2" />
+      <DatePicker fx:id="endDate" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+   </children>
+</GridPane>
