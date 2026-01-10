@@ -3,7 +3,6 @@ package com.isep.smarttripplanner.controller;
 import com.isep.smarttripplanner.service.GoogleMapsAPI;
 import com.isep.smarttripplanner.service.IMapService;
 import com.isep.smarttripplanner.service.IWeatherService;
-import com.isep.smarttripplanner.service.OpenWeatherMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -46,7 +45,7 @@ public class MapController {
     private static double selectedLon = 2.3522; // Static for persistence
 
     private final IMapService mapService = new GoogleMapsAPI();
-    private final IWeatherService weatherService = new OpenWeatherMap();
+    private final IWeatherService weatherService = new com.isep.smarttripplanner.service.OpenMeteoService();
 
     public void initialize() {
         System.out.println("MapController: Initializing...");
@@ -54,8 +53,8 @@ public class MapController {
         // Navigation logic for weather explorer
         weatherContainer.setOnMouseClicked(e -> {
             if (currentIconUrl != null) {
-                WeatherController.setData(currentCity, currentArea, currentPinCode, currentIconUrl, tempLabel.getText(),
-                        weatherLabel.getText());
+                // Use persisted coordinates for weather view
+                WeatherController.setData(currentCity, selectedLat, selectedLon);
                 if (RootController.getInstance() != null) {
                     RootController.getInstance().showWeatherView();
                 }

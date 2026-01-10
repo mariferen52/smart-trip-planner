@@ -24,14 +24,56 @@ public class GoogleMapsAPI implements IMapService {
                 "<style>html, body { height: 100%; margin: 0; padding: 0; } #map { height: 100%; width: 100%; cursor: crosshair; }</style>"
                 +
                 "</head><body><div id='map'></div><script>" +
-                "var map = L.map('map').setView([" + lat + ", " + lon + "], 13);" +
-                "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);" +
-                "var marker = L.marker([" + lat + ", " + lon + "]).addTo(map);" +
-                "map.on('click', function(e) {" +
-                "  var coord = e.latlng;" +
-                "  marker.setLatLng(coord);" +
-                "  if(window.javaApp) { window.javaApp.onLocationSelected(coord.lat, coord.lng); }" +
+                "window.map = L.map('map').setView([" + lat + ", " + lon + "], 5);" +
+                "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.map);" +
+                "var markers = [];" +
+                "var routeLine = null;" +
+                "window.selectionMarker = L.marker([" + lat + ", " + lon + "]).addTo(window.map);" + // Default
+                                                                                                     // selection marker
+
+                "function clearMap() {" +
+                "  if(routeLine) window.map.removeLayer(routeLine);" +
+                "  markers.forEach(m => window.map.removeLayer(m));" +
+                "  markers = [];" +
+                "}" +
+
+                "function addMarker(lat, lon, title) {" +
+                "  var m = L.marker([lat, lon]).addTo(window.map).bindPopup(title);" +
+                "  markers.push(m);" +
+                "}" +
+
+                "function fitBounds() {" +
+                "  if(markers.length > 0) {" +
+                "    var group = new L.featureGroup(markers);" +
+                "    window.map.fitBounds(group.getBounds().pad(0.1));" +
+                "  }" +
+                "}" +
+
+                "function drawRoute(points) {" +
+                // points is array of arrays: [[lat, lon], [lat, lon]]
+                "  if(routeLine) window.map.removeLayer(routeLine);" +
+                "  routeLine = L.polyline(points, {color: 'blue', weight: 4}).addTo(window.map);" +
+                "}" +
+
+                "// Removed manualClick, logic moved to Java injection" +
+
+                "// Click handler (Standard)" +
+                "document.addEventListener('click', function(e) {" +
+                "  console.log('Native click at ' + e.clientX + ',' + e.clientY);" +
                 "});" +
+
+                "window.map.on('click', function(e) {" +
+                "  var coord = e.latlng;" +
+                "  if(selectionMarker) { selectionMarker.setLatLng(coord); }" +
+                "  else { selectionMarker = L.marker(coord).addTo(map); }" +
+                "  if(window.javaApp) {" +
+                "    window.javaApp.log('Map clicked at: ' + coord);" +
+                "    window.javaApp.onLocationSelected(coord.lat, coord.lng);" +
+                "  } else {" +
+                "    alert('CRITICAL ERROR: Java Bridge (javaApp) NOT FOUND. Map clicks will not work.');" +
+                "  }" +
+                "});" +
+
                 "setTimeout(function() { map.invalidateSize(); }, 500);" +
                 "</script></body></html>";
     }

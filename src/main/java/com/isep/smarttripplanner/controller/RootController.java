@@ -15,6 +15,9 @@ import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import com.isep.smarttripplanner.controller.TripController;
+import com.isep.smarttripplanner.repository.TripRepository;
+import com.isep.smarttripplanner.model.Trip;
+import com.isep.smarttripplanner.controller.TripDetailController;
 
 public class RootController {
 
@@ -144,18 +147,22 @@ public class RootController {
                 return;
             }
 
-            mainContent.getChildren().clear();
-            mainContent.getChildren().add(view);
-
-            AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setBottomAnchor(view, 0.0);
-            AnchorPane.setLeftAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
+            loadView(view);
 
         } catch (IOException e) {
             System.err.println("Error loading FXML: " + fxmlPath);
             e.printStackTrace();
         }
+    }
+
+    public void loadView(javafx.scene.Node view) {
+        mainContent.getChildren().clear();
+        mainContent.getChildren().add(view);
+
+        AnchorPane.setTopAnchor(view, 0.0);
+        AnchorPane.setBottomAnchor(view, 0.0);
+        AnchorPane.setLeftAnchor(view, 0.0);
+        AnchorPane.setRightAnchor(view, 0.0);
     }
 
     @FXML
@@ -165,9 +172,35 @@ public class RootController {
     }
 
     @FXML
-    public void showMap() {
-        System.out.println("DEBUG: showMap invoked");
-        loadView("/com/isep/smarttripplanner/views/map-view.fxml");
+    public void showMyTrip() {
+        System.out.println("DEBUG: showMyTrip invoked");
+        try {
+            TripRepository repo = new TripRepository();
+            Trip activeTrip = repo.findActiveTrip();
+
+            if (activeTrip != null) {
+                // Load details view
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/com/isep/smarttripplanner/views/trip-details-view.fxml"));
+                javafx.scene.Node view = loader.load();
+
+                TripDetailController controller = loader.getController();
+                controller.setTrip(activeTrip);
+
+                mainContent.getChildren().setAll(view);
+                AnchorPane.setTopAnchor(view, 0.0);
+                AnchorPane.setBottomAnchor(view, 0.0);
+                AnchorPane.setLeftAnchor(view, 0.0);
+                AnchorPane.setRightAnchor(view, 0.0);
+            } else {
+                // No trip -> Go to Home
+                System.out.println("No active trip found, redirecting to Home.");
+                changeToHomeView();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            loadView("/com/isep/smarttripplanner/views/home-view.fxml");
+        }
     }
 
     @FXML

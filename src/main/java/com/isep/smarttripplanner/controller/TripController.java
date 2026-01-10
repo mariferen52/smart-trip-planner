@@ -19,8 +19,6 @@ public class TripController {
     @FXML
     private AnchorPane mainContent;
 
-    /* Active Trip */
-
     @FXML
     private Label tripTitle;
 
@@ -34,12 +32,18 @@ public class TripController {
     private VBox dayTrackerCard;
 
     @FXML
+    private VBox weatherCard;
+
+    private final com.isep.smarttripplanner.service.IWeatherService weatherService = new com.isep.smarttripplanner.service.OpenMeteoService();
+    @FXML
+    private javafx.scene.web.WebView tripMapWebView;
+
+    @FXML
     private VBox activeTripContainer;
 
     @FXML
     private HBox widgetsContainer;
 
-    /* Create Trip */
     @FXML
     private Label welcomeLabel;
 
@@ -69,8 +73,10 @@ public class TripController {
         TripRepository repo = new TripRepository();
         try {
             this.currentActiveTrip = repo.findActiveTrip();
+            System.out.println("TripController: loadDashboardData called. Active Trip found: "
+                    + (currentActiveTrip != null ? currentActiveTrip.getTitle() : "NONE"));
+
             if (currentActiveTrip != null) {
-                // Show Active Trip Dashboard
                 activeTripContainer.setVisible(true);
                 activeTripContainer.setManaged(true);
                 welcomeLabel.setVisible(false);
@@ -103,6 +109,43 @@ public class TripController {
                 }
                 updateCard(dayTrackerCard, dayValue, daySubtitle);
 
+                if (currentActiveTrip.getDestinations() != null && !currentActiveTrip.getDestinations().isEmpty()) {
+                    weatherCard.setOnMouseClicked(event -> {
+                        try {
+                            if (currentActiveTrip != null && !currentActiveTrip.getDestinations().isEmpty()) {
+                                com.isep.smarttripplanner.controller.WeatherController.setTrip(currentActiveTrip);
+                            }
+                            com.isep.smarttripplanner.controller.RootController.getInstance()
+                                    .loadView("/com/isep/smarttripplanner/views/weather-view.fxml");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    weatherCard.setStyle(weatherCard.getStyle() + "; -fx-cursor: hand;");
+
+                    com.isep.smarttripplanner.model.Destination firstDest = currentActiveTrip.getDestinations().get(0);
+                    weatherService.getForecast(firstDest.getLatitude(), firstDest.getLongitude())
+                            .thenAccept(weather -> {
+                                javafx.application.Platform.runLater(() -> {
+                                    String temp = String.format("%.0f°", weather.getTemperature());
+                                    String desc = weather.getDescription();
+                                    if (desc != null && !desc.isEmpty()) {
+                                        desc = desc.substring(0, 1).toUpperCase() + desc.substring(1);
+                                    }
+                                    System.out.println("DEBUG: Weather updated on Dashboard: " + temp + ", " + desc);
+                                    updateCard(weatherCard, temp, desc);
+                                });
+                            }).exceptionally(ex -> {
+                                ex.printStackTrace();
+                                javafx.application.Platform.runLater(() -> {
+                                    updateCard(weatherCard, "--", "Error");
+                                });
+                                return null;
+                            });
+                } else {
+                    updateCard(weatherCard, "--", "No Dest.");
+                }
+
             } else {
                 activeTripContainer.setVisible(false);
                 activeTripContainer.setManaged(false);
@@ -117,20 +160,41 @@ public class TripController {
     }
 
     @FXML
-    public void onDeleteTrip() {
+    public void onCompleteTrip() {
         if (currentActiveTrip != null) {
             try {
                 TripRepository repo = new TripRepository();
-                repo.deleteTrip(currentActiveTrip.getId());
+                currentActiveTrip.setStatus(com.isep.smarttripplanner.model.TripStatus.COMPLETED);
+                repo.updateTrip(currentActiveTrip);
+                System.out.println("Trip marked as COMPLETED: " + currentActiveTrip.getId());
 
                 loadDashboardData();
             } catch (Exception e) {
                 e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
-                alert.setContentText("Could not delete trip: " + e.getMessage());
+                alert.setContentText("Could not complete trip: " + e.getMessage());
                 alert.showAndWait();
             }
+        }
+    }
+
+    @FXML
+    private void openTripDetails() {
+        System.out.println("DEBUG: openTripDetails CLICKED!");
+        try {
+            System.out.println("DEBUG: Loading trip-details-view.fxml...");
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/isep/smarttripplanner/views/trip-details-view.fxml"));
+            javafx.scene.Node view = loader.load();
+
+            com.isep.smarttripplanner.controller.TripDetailController controller = loader.getController();
+            controller.setTrip(currentActiveTrip);
+
+            System.out.println("DEBUG: Switching View...");
+            homeView.getChildren().setAll(view);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -140,9 +204,9 @@ public class TripController {
         int index = 0;
         for (Node node : card.getChildren()) {
             if (node instanceof Label label) {
-                if (index == 1) { // Value
+                if (index == 1) {
                     label.setText(value);
-                } else if (index == 2) { // Subtitle
+                } else if (index == 2) {
                     label.setText(subtitle);
                 }
                 index++;
@@ -177,7 +241,6 @@ public class TripController {
         createTripButton.getStyleClass().add(pad);
         setIconSize(createTripButtonIcon, largeFontSize * 1.2);
 
-        /* Active Trip HBox */
         double dashboardFontSize = newValue / 20;
 
         tripTitle.setStyle("-fx-font-size: " + (dashboardFontSize * 1.5) + "px; -fx-font-weight: bold;");
@@ -187,13 +250,13 @@ public class TripController {
                     int index = 0;
                     for (Node child : widget.getChildren()) {
                         if (child instanceof Label label) {
-                            if (index == 0) { // Title
+                            if (index == 0) {
                                 label.setStyle("-fx-font-size: " + (dashboardFontSize * 0.8)
                                         + "px; -fx-font-weight: bold; -fx-text-fill: white;");
-                            } else if (index == 1) { // Value
+                            } else if (index == 1) {
                                 label.setStyle("-fx-font-size: " + (dashboardFontSize * 1.5)
                                         + "px; -fx-font-weight: bold; -fx-text-fill: white;");
-                            } else { // Subtitle
+                            } else {
                                 label.setStyle(
                                         "-fx-font-size: " + (dashboardFontSize * 0.6) + "px; -fx-text-fill: white;");
                             }

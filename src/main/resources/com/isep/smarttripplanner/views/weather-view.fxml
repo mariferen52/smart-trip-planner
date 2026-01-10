@@ -71,10 +71,13 @@
         <!-- Daily Forecast Section -->
         <VBox styleClass="forecast-section" alignment="CENTER" spacing="10" VBox.vgrow="NEVER">
             <Label text="Daily forecast" styleClass="forecast-title"/>
-            <HBox fx:id="forecastContainer" alignment="CENTER" spacing="15">
-                <!-- Forecast items added dynamically -->
-            </HBox>
-            <Label text="Hourly" styleClass="hourly-label"/>
+            <javafx.scene.control.ScrollPane fitToHeight="true" fitToWidth="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                     <HBox fx:id="forecastContainer" alignment="CENTER" spacing="15" style="-fx-padding: 0 0 10 0;">
+                        <!-- Forecast items added dynamically -->
+                     </HBox>
+                </content>
+            </javafx.scene.control.ScrollPane>
         </VBox>
         
     </VBox>
