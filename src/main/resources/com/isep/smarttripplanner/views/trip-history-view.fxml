@@ -8,7 +8,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.isep.smarttripplanner.controller.TripHistoryController"
-            style="-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+            style="-fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #1e5799 0%, #2989d8 25%, #56c1f5 60%, #87CEEB 100%);">
     
     <VBox spacing="15" AnchorPane.topAnchor="25.0" AnchorPane.bottomAnchor="25.0" 
           AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0">

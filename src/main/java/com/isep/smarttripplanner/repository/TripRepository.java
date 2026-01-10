@@ -45,10 +45,23 @@ public class TripRepository {
                 "name TEXT," +
                 "latitude REAL," +
                 "longitude REAL," +
+                "destination_start_date TEXT," +
+                "destination_end_date TEXT," +
                 "FOREIGN KEY (trip_id) REFERENCES trips(id)" +
                 ")";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+
+            // Attempt to add columns if they don't exist (Migration for existing DB)
+            try {
+                stmt.execute("ALTER TABLE destinations ADD COLUMN destination_start_date TEXT");
+            } catch (SQLException ignored) {
+            } // Column likely exists
+
+            try {
+                stmt.execute("ALTER TABLE destinations ADD COLUMN destination_end_date TEXT");
+            } catch (SQLException ignored) {
+            } // Column likely exists
         }
     }
 
@@ -98,13 +111,15 @@ public class TripRepository {
     }
 
     private void insertDestinations(Trip trip) throws SQLException {
-        String sql = "INSERT INTO destinations (trip_id, name, latitude, longitude) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO destinations (trip_id, name, latitude, longitude, destination_start_date, destination_end_date) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             for (Destination d : trip.getDestinations()) {
                 stmt.setString(1, trip.getId());
                 stmt.setString(2, d.getName());
                 stmt.setDouble(3, d.getLatitude());
                 stmt.setDouble(4, d.getLongitude());
+                stmt.setObject(5, d.getDestinationStartDate());
+                stmt.setObject(6, d.getDestinationEndDate());
                 stmt.execute();
             }
         }
@@ -139,6 +154,15 @@ public class TripRepository {
                     d.setName(rs.getString("name"));
                     d.setLatitude(rs.getDouble("latitude"));
                     d.setLongitude(rs.getDouble("longitude"));
+
+                    String startStr = rs.getString("destination_start_date");
+                    if (startStr != null)
+                        d.setDestinationStartDate(LocalDate.parse(startStr));
+
+                    String endStr = rs.getString("destination_end_date");
+                    if (endStr != null)
+                        d.setDestinationEndDate(LocalDate.parse(endStr));
+
                     destinations.add(d);
                 }
                 return destinations;
@@ -178,15 +202,68 @@ public class TripRepository {
     }
 
     public void addDestination(String tripId, Destination destination) {
-        String sql = "INSERT INTO destinations (trip_id, name, latitude, longitude) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO destinations (trip_id, name, latitude, longitude, destination_start_date, destination_end_date) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, tripId);
             stmt.setString(2, destination.getName());
             stmt.setDouble(3, destination.getLatitude());
             stmt.setDouble(4, destination.getLongitude());
+            stmt.setObject(5, destination.getDestinationStartDate());
+            stmt.setObject(6, destination.getDestinationEndDate());
             stmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error adding destination", e);
+        }
+    }
+
+    public void updateTrip(Trip trip) {
+        String sql = "UPDATE trips SET title = ?, startDate = ?, endDate = ?, budget = ?, status = ? WHERE id = ?";
+        String deleteDestSql = "DELETE FROM destinations WHERE trip_id = ?";
+        String insertDestSql = "INSERT INTO destinations(trip_id, name, latitude, longitude, destination_start_date, destination_end_date) VALUES(?, ?, ?, ?, ?, ?)";
+
+        try {
+            conn.setAutoCommit(false);
+            try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, trip.getTitle());
+                pstmt.setObject(2, trip.getStartDate());
+                pstmt.setObject(3, trip.getTripEndDate());
+                pstmt.setDouble(4, trip.getBudget());
+                pstmt.setString(5, trip.getStatus().name());
+                pstmt.setString(6, trip.getId());
+                pstmt.executeUpdate();
+
+                // Replace destinations
+                try (java.sql.PreparedStatement delStmt = conn.prepareStatement(deleteDestSql)) {
+                    delStmt.setString(1, trip.getId());
+                    delStmt.executeUpdate();
+                }
+
+                try (java.sql.PreparedStatement destStmt = conn.prepareStatement(insertDestSql)) {
+                    for (com.isep.smarttripplanner.model.Destination d : trip.getDestinations()) {
+                        destStmt.setString(1, trip.getId());
+                        destStmt.setString(2, d.getName());
+                        destStmt.setDouble(3, d.getLatitude());
+                        destStmt.setDouble(4, d.getLongitude());
+                        destStmt.setObject(5, d.getDestinationStartDate());
+                        destStmt.setObject(6, d.getDestinationEndDate());
+                        destStmt.addBatch();
+                    }
+                    destStmt.executeBatch();
+                }
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (java.sql.SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

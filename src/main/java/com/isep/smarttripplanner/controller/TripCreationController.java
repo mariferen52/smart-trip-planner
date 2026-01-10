@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javafx.fxml.FXMLLoader;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.IOException;
@@ -26,13 +27,13 @@ import com.isep.smarttripplanner.repository.TripRepository;
 public class TripCreationController {
 
     @FXML
-    public VBox tripTitle;
+    private VBox tripTitle;
     @FXML
-    public VBox budgetTitle;
+    private VBox budgetTitle;
     @FXML
-    public VBox startDate;
+    private VBox startDate;
     @FXML
-    public VBox tripCreationForm;
+    private VBox tripCreationForm;
     @FXML
     private AnchorPane tripCreationView;
     @FXML
@@ -56,12 +57,10 @@ public class TripCreationController {
     @FXML
     private Button cancelButton;
 
-    // Data list for table
     private final ObservableList<Destination> destinationList = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
-        // Validation for injection
         if (tripCreationView == null) {
             System.err.println("CRITICAL: tripCreationView is NULL. FXML Injection failed.");
             return;
@@ -96,16 +95,28 @@ public class TripCreationController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/isep/smarttripplanner/views/add-destination-view.fxml"));
+
+            // Load the FXML to get the root node and initialize the controller
+            javafx.scene.Node content = loader.load();
             DialogPane dialogPane = new DialogPane();
-            dialogPane.setContent(loader.load());
+            dialogPane.setContent(content);
 
             AddDestinationController controller = loader.getController();
+
+            // Fetch conflicting dates from CURRENT trip destinations
+            java.util.List<javafx.util.Pair<LocalDate, LocalDate>> occupiedRanges = new java.util.ArrayList<>();
+            for (Destination d : destinationList) {
+                if (d.getDestinationStartDate() != null && d.getDestinationEndDate() != null) {
+                    occupiedRanges.add(new javafx.util.Pair<>(d.getDestinationStartDate(), d.getDestinationEndDate()));
+                }
+            }
+            controller.setBlockedRanges(occupiedRanges);
 
             Dialog<Destination> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
             dialog.setTitle("Add New Destination");
+            dialog.setResizable(false);
 
-            // Center the dialog
             Window owner = tripCreationView.getScene().getWindow();
             if (owner != null) {
                 dialog.initOwner(owner);
@@ -119,6 +130,19 @@ public class TripCreationController {
             ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
+            final Button btAdd = (Button) dialog.getDialogPane().lookupButton(addButtonType);
+            btAdd.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+                if (controller.getDestination() == null) {
+                    event.consume();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Validation Error");
+                    alert.setHeaderText("Invalid Destination Details");
+                    alert.setContentText(
+                            "Please ensure a city is selected and dates are valid.\nEnd date cannot be before start date.");
+                    alert.showAndWait();
+                }
+            });
+
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == addButtonType) {
                     return controller.getDestination();
@@ -126,11 +150,34 @@ public class TripCreationController {
                 return null;
             });
 
+            Stage ownerStage = (Stage) tripCreationView.getScene().getWindow();
+            boolean wasFullScreen = ownerStage != null && ownerStage.isFullScreen();
+
             Optional<Destination> result = dialog.showAndWait();
             result.ifPresent(destinationList::add);
 
+            if (wasFullScreen && ownerStage != null) {
+                ownerStage.setFullScreen(true);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert("Error", "Could not open add destination dialog: " + e.getMessage());
+        }
+    }
+
+    private Trip editingTrip;
+
+    public void setTrip(Trip trip) {
+        this.editingTrip = trip;
+        tripTitleInput.setText(trip.getTitle());
+        tripBudgetInput.setText(String.valueOf(trip.getBudget()));
+        destinationList.setAll(trip.getDestinations());
+        saveButton.setText("Apply Changes");
+
+        // Update header if possible
+        if (tripCreationView.getParent() != null) {
+            // Optional: update title label if it existed
         }
     }
 
@@ -174,15 +221,35 @@ public class TripCreationController {
             }
         }
 
-        Trip newTrip = new Trip(title, minDate, maxDate, budget, new java.util.ArrayList<>(destinationList));
+        // If editing, verify we aren't creating a new object with a new ID
+        if (editingTrip != null) {
+            editingTrip.setTitle(title);
+            editingTrip.setBudget(budget);
+            editingTrip.setStartDate(minDate);
+            editingTrip.setTripEndDate(maxDate);
+            editingTrip.setDestinations(new java.util.ArrayList<>(destinationList));
 
-        try {
-            TripRepository repo = new TripRepository();
-            repo.insertTrip(newTrip);
-            returnToHome();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error", "Could not save trip: " + e.getMessage());
+            try {
+                TripRepository repo = new TripRepository();
+                repo.updateTrip(editingTrip);
+                System.out.println("TripCreationController: Trip updated: " + editingTrip.getTitle());
+                returnToHome();
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Error", "Could not update trip: " + e.getMessage());
+            }
+        } else {
+            // New Trip
+            Trip newTrip = new Trip(title, minDate, maxDate, budget, new java.util.ArrayList<>(destinationList));
+            try {
+                TripRepository repo = new TripRepository();
+                repo.insertTrip(newTrip);
+                System.out.println("TripCreationController: Trip saved successfully: " + newTrip.getTitle());
+                returnToHome();
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Error", "Could not save trip: " + e.getMessage());
+            }
         }
     }
 
@@ -218,6 +285,7 @@ public class TripCreationController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
+        alert.setResizable(false);
         alert.showAndWait();
     }
 

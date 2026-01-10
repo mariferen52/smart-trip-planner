@@ -21,16 +21,12 @@
                   </VBox>
                   <VBox maxWidth="-Infinity" maxHeight="-Infinity" fx:id="activeTripContainer" alignment="CENTER_LEFT" spacing="20.0" visible="false">
                      <children>
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                           <children>
-                              <Label fx:id="tripTitle" text="New York">
+                              <Label onMouseClicked="#openTripDetails" fx:id="tripTitle" text="New York" style="-fx-cursor: hand;">
+                                 <tooltip><Tooltip text="Click to view details"/></tooltip>
                                  <graphic>
                                     <!-- Image Placeholder-->
                                  </graphic>
                               </Label>
-                              <Button fx:id="deleteTripButton" text="Delete" onAction="#onDeleteTrip" style="-fx-background-color: #ff4444; -fx-text-fill: white;" />
-                           </children>
-                        </HBox>
                         <HBox maxHeight="-Infinity" maxWidth="-Infinity" fx:id="widgetsContainer" alignment="CENTER_LEFT" spacing="15.0">
                            <children>
                               <VBox fx:id="currencyCard" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 15; -fx-padding: 15;">
@@ -57,11 +53,11 @@
                                  </children>
                               </VBox>
 
-                              <VBox  alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 15; -fx-padding: 15;">
+                              <VBox fx:id="weatherCard" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 15; -fx-padding: 15;">
                                  <children>
                                      <Label style="-fx-font-weight: bold;" text="Weather" textFill="white" />
-                                    <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="26°" textFill="white" />
-                                    <Label style="-fx-font-size: 10;" text="Cloudy" textFill="white" />
+                                    <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="--" textFill="white" />
+                                    <Label style="-fx-font-size: 10;" text="Fetching..." textFill="white" />
                                  </children>
                               </VBox>
                            </children>
