@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.isep.smarttripplanner.controller.ProfileController"
+            prefHeight="400.0" prefWidth="600.0">
+    <VBox alignment="CENTER" spacing="20.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Label text="User Profile" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label fx:id="usernameLabel" text="User Name"/>
+        <Label fx:id="emailLabel" text="user@example.com"/>
+    </VBox>
+</AnchorPane>

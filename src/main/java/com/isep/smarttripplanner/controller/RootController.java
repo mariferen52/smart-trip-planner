@@ -88,12 +88,19 @@ public class RootController {
     @FXML
     private Label close;
 
+    private static RootController instance;
+
+    public static RootController getInstance() {
+        return instance;
+    }
+
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
 
     @FXML
     private void initialize() throws IOException {
+        instance = this;
         this.isExpanded = false;
         rootLayout.heightProperty().addListener((obs, oldVal, newVal) -> {
             updateFontSize(newVal.doubleValue());
@@ -124,6 +131,54 @@ public class RootController {
         AnchorPane.setTopAnchor(cachedHomeView, 0.0);
         AnchorPane.setLeftAnchor(cachedHomeView, 0.0);
         AnchorPane.setRightAnchor(cachedHomeView, 0.0);
+    }
+
+    public void loadView(String fxmlPath) {
+        try {
+            System.out.println("Loading view: " + fxmlPath);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            javafx.scene.Node view = loader.load();
+
+            if (view == null) {
+                System.err.println("View is null for path: " + fxmlPath);
+                return;
+            }
+
+            mainContent.getChildren().clear();
+            mainContent.getChildren().add(view);
+
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
+
+        } catch (IOException e) {
+            System.err.println("Error loading FXML: " + fxmlPath);
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void showProfile() {
+        System.out.println("DEBUG: showProfile invoked");
+        loadView("/com/isep/smarttripplanner/views/profile-view.fxml");
+    }
+
+    @FXML
+    public void showMap() {
+        System.out.println("DEBUG: showMap invoked");
+        loadView("/com/isep/smarttripplanner/views/map-view.fxml");
+    }
+
+    @FXML
+    public void showTripHistory() {
+        System.out.println("DEBUG: showTripHistory invoked");
+        loadView("/com/isep/smarttripplanner/views/trip-history-view.fxml");
+    }
+
+    public void showWeatherView() {
+        System.out.println("DEBUG: showWeatherView invoked");
+        loadView("/com/isep/smarttripplanner/views/weather-view.fxml");
     }
 
     private void setLabelSize(Label button, Region buttonIcon, double fontSize) {

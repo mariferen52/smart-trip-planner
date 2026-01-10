@@ -1,0 +1,149 @@
+/* Fluent Weather Inspired Design */
+.root {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #1e5799 0%, #2989d8 25%, #56c1f5 60%, #87CEEB 100%);
+}
+
+/* City Header Section */
+.city-header {
+    -fx-padding: 5 0 15 0;
+    -fx-alignment: center;
+}
+
+.city-name {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 2, 0, 1, 1);
+}
+
+.location-detail {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+}
+
+.update-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+}
+
+/* Main Temperature Display */
+.temp-main-container {
+    -fx-padding: 20 0 30 0;
+    -fx-alignment: center;
+}
+
+.weather-icon-large {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 6, 0, 2, 2);
+}
+
+.weather-temp-large {
+    -fx-font-size: 80px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 4, 0, 2, 2);
+}
+
+.weather-desc-main {
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+    -fx-font-weight: normal;
+}
+
+.feels-like {
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+}
+
+/* Weather Details Grid */
+.details-card {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 12;
+    -fx-padding: 12 20;
+}
+
+.detail-item {
+    -fx-padding: 8 12;
+    -fx-min-width: 90;
+    -fx-alignment: center;
+}
+
+.detail-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-weight: normal;
+}
+
+.detail-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Daily Forecast Section */
+.forecast-section {
+    -fx-background-color: rgba(0, 0, 0, 0.25);
+    -fx-background-radius: 15 15 0 0;
+    -fx-padding: 20 40;
+    -fx-alignment: center;
+}
+
+.forecast-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 0 0 15 0;
+}
+
+/* Forecast Items */
+.forecast-item {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-background-radius: 12;
+    -fx-padding: 15 12;
+    -fx-min-width: 95;
+    -fx-max-width: 110;
+    -fx-min-height: 130;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.forecast-item:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.28);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.forecast-item-today {
+    -fx-background-color: rgba(255, 255, 255, 0.22);
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+}
+
+.forecast-day {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+}
+
+.forecast-temp {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.forecast-temp-low {
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-font-size: 13px;
+}
+
+.forecast-chance {
+    -fx-text-fill: #7dd3fc;
+    -fx-font-size: 12px;
+}
+
+/* Hourly Section Label */
+.hourly-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+    -fx-padding: 15 0 5 0;
+}
