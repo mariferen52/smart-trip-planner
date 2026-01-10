@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.web.WebView?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
+            fx:controller="com.isep.smarttripplanner.controller.MapController">
+    <WebView fx:id="mapWebView" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" 
+             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+    
+    <VBox fx:id="weatherContainer" spacing="5" minWidth="200" style="-fx-background-color: rgba(255, 255, 255, 0.9); -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10; -fx-cursor: hand;" 
+          AnchorPane.topAnchor="20" AnchorPane.rightAnchor="20">
+        <Label fx:id="cityLabel" text="Paris" style="-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #2c3e50;"/>
+        <Label fx:id="areaLabel" text="" style="-fx-font-size: 12; -fx-text-fill: #34495e;"/>
+        <Label fx:id="pinCodeLabel" text="" style="-fx-font-size: 12; -fx-text-fill: #34495e;"/>
+        <ImageView fx:id="weatherIcon" fitWidth="50" fitHeight="50" preserveRatio="true"/>
+        <Label fx:id="weatherLabel" text="Loading Weather..." style="-fx-font-weight: bold; -fx-font-size: 14;"/>
+        <Label fx:id="tempLabel" text="--°C" style="-fx-font-size: 20;"/>
+    </VBox>
+
+    <VBox alignment="CENTER" spacing="10" AnchorPane.bottomAnchor="30" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button fx:id="addDestinationBtn" text="+ Add Destination" onAction="#handleStartSelection"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 25; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);"/>
+        
+        <HBox fx:id="selectionOverlay" visible="false" spacing="10" alignment="CENTER" maxWidth="-Infinity"
+              style="-fx-background-color: rgba(255,255,255,0.9); -fx-padding: 10; -fx-background-radius: 15; -fx-border-color: #3498db; -fx-border-width: 2;">
+            <Label fx:id="selectionStatus" text="Click on map to select..." style="-fx-text-fill: #2c3e50; -fx-font-weight: bold;"/>
+            <Button text="Confirm" onAction="#handleConfirmSelection"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"/>
+            <Button text="Cancel" onAction="#handleCancelSelection"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

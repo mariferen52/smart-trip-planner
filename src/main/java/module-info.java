@@ -1,6 +1,10 @@
 module com.isep.smarttripplanner {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.web;
+    requires jdk.jsobject;
+    requires com.google.gson;
+    requires java.net.http;
     requires java.desktop;
     requires jdk.compiler;
     requires java.sql;

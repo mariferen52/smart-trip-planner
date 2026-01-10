@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.isep.smarttripplanner.controller.WeatherController"
+            prefHeight="500.0" prefWidth="700.0"
+            styleClass="root"
+            stylesheets="@weather.css">
+    
+    <VBox spacing="5" alignment="CENTER" AnchorPane.topAnchor="15.0" AnchorPane.bottomAnchor="0.0" 
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        
+        <!-- City Header -->
+        <VBox styleClass="city-header" alignment="CENTER">
+            <padding><Insets left="30" right="30"/></padding>
+            <HBox spacing="8" alignment="CENTER">
+                <Label text="📍" style="-fx-font-size: 18px;"/>
+                <Label fx:id="cityLabel" text="City" styleClass="city-name"/>
+            </HBox>
+            <Label fx:id="updateTimeLabel" text="Updated just now" styleClass="update-time"/>
+        </VBox>
+        
+        <!-- Main Temperature Display -->
+        <HBox styleClass="temp-main-container" alignment="CENTER" spacing="20">
+            <padding><Insets left="30" right="30"/></padding>
+            <ImageView fx:id="weatherIconView" fitWidth="100" fitHeight="100" preserveRatio="true" styleClass="weather-icon-large"/>
+            <VBox alignment="CENTER_LEFT" spacing="3">
+                <Label fx:id="tempLabel" text="--°C" styleClass="weather-temp-large"/>
+                <Label fx:id="descLabel" text="Description" styleClass="weather-desc-main"/>
+                <Label fx:id="feelsLikeLabel" text="Feels like --°C" styleClass="feels-like"/>
+            </VBox>
+        </HBox>
+        
+        <!-- Weather Details Row -->
+        <HBox alignment="CENTER">
+            <padding><Insets left="20" right="20" bottom="10"/></padding>
+            <HBox styleClass="details-card" spacing="5" alignment="CENTER">
+                <VBox styleClass="detail-item" alignment="CENTER" spacing="2">
+                    <Label text="Wind" styleClass="detail-label"/>
+                    <Label fx:id="windLabel" text="10 km/h" styleClass="detail-value"/>
+                </VBox>
+                <VBox styleClass="detail-item" alignment="CENTER" spacing="2">
+                    <Label text="Humidity" styleClass="detail-label"/>
+                    <Label fx:id="humidityLabel" text="52%" styleClass="detail-value"/>
+                </VBox>
+                <VBox styleClass="detail-item" alignment="CENTER" spacing="2">
+                    <Label text="Visibility" styleClass="detail-label"/>
+                    <Label fx:id="visibilityLabel" text="11 km" styleClass="detail-value"/>
+                </VBox>
+                <VBox styleClass="detail-item" alignment="CENTER" spacing="2">
+                    <Label text="Pressure" styleClass="detail-label"/>
+                    <Label fx:id="pressureLabel" text="1014 hPa" styleClass="detail-value"/>
+                </VBox>
+                <VBox styleClass="detail-item" alignment="CENTER" spacing="2">
+                    <Label text="UV Index" styleClass="detail-label"/>
+                    <Label fx:id="uvLabel" text="1 (Low)" styleClass="detail-value"/>
+                </VBox>
+            </HBox>
+        </HBox>
+        
+        <!-- Spacer -->
+        <VBox VBox.vgrow="ALWAYS"/>
+        
+        <!-- Daily Forecast Section -->
+        <VBox styleClass="forecast-section" alignment="CENTER" spacing="10" VBox.vgrow="NEVER">
+            <Label text="Daily forecast" styleClass="forecast-title"/>
+            <HBox fx:id="forecastContainer" alignment="CENTER" spacing="15">
+                <!-- Forecast items added dynamically -->
+            </HBox>
+            <Label text="Hourly" styleClass="hourly-label"/>
+        </VBox>
+        
+    </VBox>
+</AnchorPane>

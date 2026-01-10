@@ -24,19 +24,19 @@
                   </graphic>
               </Label>
 
-              <Label fx:id="profile" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Profile" VBox.vgrow="ALWAYS">
+              <Label fx:id="profile" onMouseClicked="#showProfile" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Profile" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="profileIcon" />
                   </graphic>
               </Label>
 
-              <Label fx:id="activeTrip" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Trip" VBox.vgrow="ALWAYS">
+              <Label fx:id="activeTrip" onMouseClicked="#showMap" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Trip" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="activeTripIcon" />
                   </graphic>
               </Label>
 
-              <Label fx:id="tripHistory" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Trip History" VBox.vgrow="ALWAYS">
+              <Label fx:id="tripHistory" onMouseClicked="#showTripHistory" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Trip History" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="tripHistoryIcon" />
                   </graphic>

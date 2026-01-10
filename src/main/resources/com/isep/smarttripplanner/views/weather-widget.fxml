@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER"
+      spacing="5"
+      minHeight="120" minWidth="120"
+      style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 15; -fx-padding: 15; -fx-cursor: hand;">
+    
+    <Label fx:id="cityLabel" text="City" 
+           style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: white;"/>
+    
+    <HBox alignment="CENTER" spacing="5">
+        <ImageView fx:id="weatherIcon" fitWidth="40" fitHeight="40" preserveRatio="true"/>
+        <Label fx:id="tempLabel" text="--°" 
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+    </HBox>
+    
+    <Label fx:id="descLabel" text="--" 
+           style="-fx-font-size: 10px; -fx-text-fill: white;"/>
+</VBox>
