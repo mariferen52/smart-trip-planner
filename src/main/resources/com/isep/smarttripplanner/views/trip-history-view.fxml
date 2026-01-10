@@ -1,15 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.isep.smarttripplanner.controller.TripHistoryController"
-            prefHeight="400.0" prefWidth="600.0">
-    <VBox alignment="CENTER" spacing="20.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <Label text="Trip History" style="-fx-font-size: 24px;"/>
-        <Label text="(No history found)"/>
+            style="-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+    
+    <VBox spacing="15" AnchorPane.topAnchor="25.0" AnchorPane.bottomAnchor="25.0" 
+          AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0">
+        
+        <!-- Header -->
+        <VBox spacing="5">
+            <Label text="Trip History" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Your completed adventures" style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.6);"/>
+        </VBox>
+        
+        <!-- Empty State (shown when no trips) -->
+        <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+            <Label text="🧳" style="-fx-font-size: 48px;"/>
+            <Label fx:id="emptyLabel" text="No completed trips yet." 
+                   style="-fx-font-size: 16px; -fx-text-fill: rgba(255,255,255,0.7);"/>
+            <Label text="Start your adventure!" 
+                   style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.5);"/>
+        </VBox>
+        
+        <!-- Trips List (hidden when empty) -->
+        <ScrollPane fx:id="scrollContainer" fitToWidth="true" 
+                    style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;" 
+                    VBox.vgrow="ALWAYS" visible="false" managed="false">
+            <VBox fx:id="historyContainer" spacing="12" style="-fx-padding: 5;">
+            </VBox>
+        </ScrollPane>
+        
     </VBox>
 </AnchorPane>
