@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20" alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.isep.smarttripplanner.controller.TotalBudgetController" style="-fx-padding: 30;">
+    
+    <Label text="Global Budget Summary" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    
+    <VBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #f5f5f5; -fx-padding: 20; -fx-background-radius: 10;">
+        <Label fx:id="totalBudgetLabel" text="Total Global Budget: $0.00" style="-fx-font-size: 16px;"/>
+        <Label fx:id="totalSpentLabel" text="Total Global Spent: $0.00" style="-fx-font-size: 16px;"/>
+    </VBox>
+
+    <Label text="Trip Breakdown" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <ScrollPane fitToWidth="true" prefHeight="250">
+        <VBox fx:id="tripSummaryContainer" spacing="10" style="-fx-padding: 10;"/>
+    </ScrollPane>
+</VBox>

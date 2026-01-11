@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox spacing="15" alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.isep.smarttripplanner.controller.BudgetController" style="-fx-padding: 20;">
+    
+    <Label text="Trip Budget Management" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Budget Limit:"/>
+        <TextField fx:id="limitField" promptText="Enter limit"/>
+        <Button text="Update" onAction="#handleUpdateLimit"/>
+    </HBox>
+
+    <ProgressBar fx:id="budgetProgressBar" prefWidth="300" progress="0.0"/>
+    
+    <HBox spacing="20" alignment="CENTER">
+        <Label fx:id="spentLabel" text="Spent: $0.00"/>
+        <Label fx:id="balanceLabel" text="Balance: $0.00"/>
+    </HBox>
+
+    <Separator/>
+
+    <Label text="Add New Expense" style="-fx-font-weight: bold;"/>
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="expenseDescField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        
+        <Label text="Amount:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="expenseAmountField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        
+        <Label text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="categoryComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Food"/>
+                    <String fx:value="Transport"/>
+                    <String fx:value="Accommodation"/>
+                    <String fx:value="Activity"/>
+                    <String fx:value="Other"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+    </GridPane>
+    
+    <Button text="Add Expense" onAction="#handleAddExpense" style="-fx-base: #4caf50; -fx-text-fill: white;"/>
+</VBox>
