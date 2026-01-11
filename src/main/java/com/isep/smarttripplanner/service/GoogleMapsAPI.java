@@ -8,7 +8,7 @@ public class GoogleMapsAPI implements IMapService {
     @Override
     public MapView renderMap(double lat, double lon) {
         if (API_KEY.equals("YOUR_API_KEY")) {
-            // Demo Mode: Use interactive Leaflet map instead of static embed
+
             return new MapView("data:text/html," + getInteractiveMapHtml(lat, lon));
         }
         String mapUrl = "https://www.google.com/maps/embed/v1/view?key=" + API_KEY + "&center=" + lat + "," + lon
@@ -28,8 +28,7 @@ public class GoogleMapsAPI implements IMapService {
                 "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.map);" +
                 "var markers = [];" +
                 "var routeLine = null;" +
-                "window.selectionMarker = L.marker([" + lat + ", " + lon + "]).addTo(window.map);" + // Default
-                                                                                                     // selection marker
+                "window.selectionMarker = L.marker([" + lat + ", " + lon + "]).addTo(window.map);" +
 
                 "function clearMap() {" +
                 "  if(routeLine) window.map.removeLayer(routeLine);" +
@@ -50,12 +49,10 @@ public class GoogleMapsAPI implements IMapService {
                 "}" +
 
                 "function drawRoute(points) {" +
-                // points is array of arrays: [[lat, lon], [lat, lon]]
+
                 "  if(routeLine) window.map.removeLayer(routeLine);" +
                 "  routeLine = L.polyline(points, {color: 'blue', weight: 4}).addTo(window.map);" +
                 "}" +
-
-                "// Removed manualClick, logic moved to Java injection" +
 
                 "// Click handler (Standard)" +
                 "document.addEventListener('click', function(e) {" +

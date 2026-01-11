@@ -8,7 +8,7 @@
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          
-         <!-- Left: Sidebar -->
+
          <left>
             <VBox fx:id="sidebar" spacing="15.0" prefWidth="500" style="-fx-padding: 30; -fx-background-color: #f9f9f9; -fx-border-color: #ddd; -fx-border-width: 0 1 0 0;">
                <children>
@@ -24,7 +24,7 @@
                   
                   <FlowPane fx:id="cardsContainer" hgap="15" vgap="15" prefWrapLength="450" alignment="CENTER">
                       <children>
-                        <!-- Budget -->
+
                         <VBox fx:id="budgetCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
                            <children>
                               <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Budget" textFill="white" />
@@ -32,7 +32,7 @@
                            </children>
                         </VBox>
 
-                        <!-- Weather -->
+
                         <VBox fx:id="weatherCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
                            <children>
                                <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Weather" textFill="white" />
@@ -40,7 +40,7 @@
                            </children>
                         </VBox>
 
-                        <!-- Start Date -->
+
                         <VBox fx:id="dayTrackerCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
                            <children>
                               <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Start Date" textFill="white" />
@@ -48,11 +48,19 @@
                            </children>
                         </VBox>
 
-                         <!-- End Date -->
+
                          <VBox fx:id="endDateCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
                             <children>
                                <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="End Date" textFill="white" />
                                <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="--" textFill="white" />
+                            </children>
+                         </VBox>
+
+
+                         <VBox fx:id="todoCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                            <children>
+                               <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="To-Do List" textFill="white" />
+                               <Label style="-fx-font-size: 22; -fx-font-weight: bold;" text="View" textFill="white" />
                             </children>
                          </VBox>
                      </children>
@@ -66,7 +74,7 @@
             </VBox>
          </left>
 
-         <!-- Center: Map -->
+
          <center>
             <StackPane>
                 <WebView fx:id="tripMapWebView" minHeight="400" minWidth="400" />

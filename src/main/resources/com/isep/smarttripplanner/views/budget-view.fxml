@@ -13,15 +13,21 @@
     <HBox spacing="10" alignment="CENTER">
         <Label text="Budget Limit:"/>
         <TextField fx:id="limitField" promptText="Enter limit"/>
+        <ComboBox fx:id="budgetCurrencyCombo" prefWidth="100"/>
         <Button text="Update" onAction="#handleUpdateLimit"/>
     </HBox>
 
     <ProgressBar fx:id="budgetProgressBar" prefWidth="300" progress="0.0"/>
     
     <HBox spacing="20" alignment="CENTER">
-        <Label fx:id="spentLabel" text="Spent: $0.00"/>
-        <Label fx:id="balanceLabel" text="Balance: $0.00"/>
+        <Label fx:id="spentLabel" text="Spent: 0.00"/>
+        <Label fx:id="balanceLabel" text="Balance: 0.00"/>
     </HBox>
+
+    <Separator/>
+    
+    <Label text="Expenses List" style="-fx-font-weight: bold;"/>
+    <ListView fx:id="expenseListView" prefHeight="200"/>
 
     <Separator/>
 

@@ -37,7 +37,7 @@
       </children>
    </GridPane>
 
-   <!-- Right: Map -->
+
    <StackPane HBox.hgrow="ALWAYS" style="-fx-border-color: #cccccc; -fx-border-width: 1;">
       <children>
          <WebView fx:id="mapWebView" minHeight="500.0" minWidth="600.0"/>

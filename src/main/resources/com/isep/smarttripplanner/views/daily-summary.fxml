@@ -9,7 +9,7 @@
     <GridPane hgap="20" vgap="20" alignment="CENTER">
         <VBox spacing="5" style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 5;" GridPane.columnIndex="0" GridPane.rowIndex="0">
             <Label text="Remaining Budget" style="-fx-font-weight: bold;"/>
-            <Label fx:id="todayBalanceLabel" text="$0.00" style="-fx-font-size: 18px;"/>
+            <Label fx:id="todayBalanceLabel" text="0.00" style="-fx-font-size: 18px;"/>
         </VBox>
         
         <VBox spacing="5" style="-fx-background-color: #f1f8e9; -fx-padding: 15; -fx-background-radius: 5;" GridPane.columnIndex="1" GridPane.rowIndex="0">

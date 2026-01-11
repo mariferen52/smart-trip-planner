@@ -32,6 +32,9 @@ public class TripHistoryController {
         loadCompletedTrips();
     }
 
+    private final com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
+    private final com.isep.smarttripplanner.service.ExchangeRateService exchangeService = new com.isep.smarttripplanner.service.ExchangeRateService();
+
     private void loadCompletedTrips() {
         try {
             TripRepository repo = new TripRepository();
@@ -62,21 +65,26 @@ public class TripHistoryController {
                 scrollContainer.setManaged(true);
             }
 
+            String userHomeCurrency = "USD";
+            try {
+                userHomeCurrency = configRepo.getConfig().getDefaultCurrency();
+            } catch (Exception e) {
+            }
+
             if (historyContainer != null) {
                 historyContainer.getChildren().clear();
 
                 for (Trip trip : completedTrips) {
-                    VBox card = createTripCard(trip);
+                    VBox card = createTripCard(trip, userHomeCurrency);
                     historyContainer.getChildren().add(card);
                 }
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
-    private VBox createTripCard(Trip trip) {
+    private VBox createTripCard(Trip trip, String targetCurrency) {
         VBox card = new VBox(10);
         card.setStyle("-fx-background-color: rgba(255,255,255,0.12); -fx-background-radius: 12; -fx-padding: 18;");
         card.setAlignment(Pos.CENTER_LEFT);
@@ -104,14 +112,63 @@ public class TripHistoryController {
         statsRow.setAlignment(Pos.CENTER_LEFT);
         statsRow.setStyle("-fx-padding: 5 0 0 0;");
 
-        Label budgetLabel = new Label(String.format("💰 $%.2f", trip.getBudget()));
+        String tripCurrency = trip.getCurrency() != null ? trip.getCurrency() : "USD";
+        Label budgetLabel = new Label(String.format("💰 %s %.0f", tripCurrency, trip.getBudget()));
         budgetLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4ade80; -fx-font-weight: bold;");
 
-        int destCount = trip.getDestinations() != null ? trip.getDestinations().size() : 0;
-        Label destLabel = new Label("📍 " + destCount + " destination" + (destCount != 1 ? "s" : ""));
-        destLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.85);");
+        if (!tripCurrency.equals(targetCurrency)) {
+            exchangeService.getExchangeRate(tripCurrency, targetCurrency).thenAccept(rate -> {
+                double converted = trip.getBudget() * rate;
+                String symbol = targetCurrency;
+                try {
+                    symbol = java.util.Currency.getInstance(targetCurrency).getSymbol();
+                } catch (Exception e) {
+                }
 
-        statsRow.getChildren().addAll(budgetLabel, destLabel);
+                final String finalSymbol = symbol;
+                javafx.application.Platform.runLater(() -> {
+                    budgetLabel.setText(String.format("💰 %s %.2f", finalSymbol, converted));
+                });
+            }).exceptionally(ex -> {
+                return null;
+            });
+        } else {
+            String symbol = tripCurrency;
+            try {
+                symbol = java.util.Currency.getInstance(tripCurrency).getSymbol();
+            } catch (Exception e) {
+            }
+            budgetLabel.setText(String.format("💰 %s %.2f", symbol, trip.getBudget()));
+        }
+
+        if (trip.getDestinations() != null && !trip.getDestinations().isEmpty()) {
+            StringBuilder sb = new StringBuilder("📍 ");
+            DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("MMM dd");
+
+            for (int i = 0; i < trip.getDestinations().size(); i++) {
+                com.isep.smarttripplanner.model.Destination d = trip.getDestinations().get(i);
+                sb.append(i + 1).append(". ").append(d.getName());
+
+                if (d.getDestinationStartDate() != null && d.getDestinationEndDate() != null) {
+                    sb.append(" (").append(d.getDestinationStartDate().format(dateFmt))
+                            .append("-").append(d.getDestinationEndDate().format(dateFmt)).append(")");
+                }
+
+                if (i < trip.getDestinations().size() - 1) {
+                    sb.append(",  ");
+                }
+            }
+
+            Label destLabel = new Label(sb.toString());
+            destLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.85);");
+            destLabel.setWrapText(true);
+
+            statsRow.getChildren().addAll(budgetLabel, destLabel);
+        } else {
+            Label destLabel = new Label("📍 No destinations");
+            destLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.70);");
+            statsRow.getChildren().addAll(budgetLabel, destLabel);
+        }
 
         card.getChildren().addAll(titleRow, dateLabel, statsRow);
 

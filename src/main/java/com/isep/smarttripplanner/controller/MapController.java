@@ -38,22 +38,18 @@ public class MapController {
     private Button addDestinationBtn;
 
     private String currentIconUrl;
-    private String currentCity = "Paris"; // Default
-    private String currentArea;
-    private String currentPinCode;
-    private static double selectedLat = 48.8566; // Static for persistence
-    private static double selectedLon = 2.3522; // Static for persistence
+    private String currentCity = "Paris";
+
+    private static double selectedLat = 48.8566;
+    private static double selectedLon = 2.3522;
 
     private final IMapService mapService = new GoogleMapsAPI();
     private final IWeatherService weatherService = new com.isep.smarttripplanner.service.OpenMeteoService();
 
     public void initialize() {
-        System.out.println("MapController: Initializing...");
 
-        // Navigation logic for weather explorer
         weatherContainer.setOnMouseClicked(e -> {
             if (currentIconUrl != null) {
-                // Use persisted coordinates for weather view
                 WeatherController.setData(currentCity, selectedLat, selectedLon);
                 if (RootController.getInstance() != null) {
                     RootController.getInstance().showWeatherView();
@@ -61,7 +57,6 @@ public class MapController {
             }
         });
 
-        // Setup JS Bridge
         mapWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
                 netscape.javascript.JSObject window = (netscape.javascript.JSObject) mapWebView.getEngine()
@@ -70,16 +65,14 @@ public class MapController {
             }
         });
 
-        loadMap(selectedLat, selectedLon); // Use persisted coordinates
+        loadMap(selectedLat, selectedLon);
     }
 
-    // Called from JavaScript
     public void onLocationSelected(double lat, double lon) {
         javafx.application.Platform.runLater(() -> {
             selectedLat = lat;
             selectedLon = lon;
             selectionStatus.setText(String.format("Coord: %.4f, %.4f", lat, lon));
-            System.out.println("Location selected: " + lat + ", " + lon);
         });
     }
 
@@ -105,16 +98,13 @@ public class MapController {
     }
 
     private void loadMap(double lat, double lon) {
-        // Load Interactive Map
         String html = mapService.getInteractiveMapHtml(lat, lon);
         mapWebView.getEngine().loadContent(html);
 
-        // Load Weather Async
         weatherService.getForecast(lat, lon).thenAccept(data -> {
             javafx.application.Platform.runLater(() -> {
                 this.currentCity = data.getCityName();
-                this.currentArea = data.getArea();
-                this.currentPinCode = data.getPinCode();
+
                 if (cityLabel != null)
                     cityLabel.setText(data.getCityName());
                 if (areaLabel != null)
@@ -129,7 +119,7 @@ public class MapController {
                     try {
                         weatherIcon.setImage(new Image(currentIconUrl, true));
                     } catch (Exception e) {
-                        System.err.println("Failed to load weather icon: " + currentIconUrl);
+
                     }
                 }
             });

@@ -42,7 +42,7 @@
                   </graphic>
               </Label>
 
-              <Label fx:id="totalBudget" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Budget" VBox.vgrow="ALWAYS">
+              <Label fx:id="totalBudget" onMouseClicked="#showTotalBudget" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="My Budget" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="totalBudgetIcon" />
                   </graphic>
@@ -51,7 +51,7 @@
 
               <Region VBox.vgrow="ALWAYS" />
 
-              <Label fx:id="settings" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Settings" VBox.vgrow="ALWAYS">
+              <Label fx:id="settings" onMouseClicked="#showSettings" alignment="CENTER_LEFT" contentDisplay="GRAPHIC_ONLY" maxWidth="Infinity" text="Settings" VBox.vgrow="ALWAYS">
                   <graphic>
                       <Region fx:id="settingsIcon" />
                   </graphic>

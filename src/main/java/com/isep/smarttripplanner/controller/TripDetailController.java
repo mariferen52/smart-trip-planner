@@ -9,14 +9,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.concurrent.Worker;
-import javafx.scene.control.ListView;
 import com.isep.smarttripplanner.repository.TripRepository;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 
 public class TripDetailController {
 
@@ -35,6 +31,8 @@ public class TripDetailController {
     private VBox dayTrackerCard;
     @FXML
     private VBox endDateCard;
+    @FXML
+    private VBox todoCard;
 
     private Trip trip;
     private final IMapService mapService = new GoogleMapsAPI();
@@ -104,10 +102,6 @@ public class TripDetailController {
         if (trip == null)
             return;
 
-        if (budgetCard != null && budgetCard.getChildren().size() >= 2) {
-            ((Label) budgetCard.getChildren().get(1)).setText(String.format("$%.0f", trip.getBudget()));
-        }
-
         if (dayTrackerCard != null && dayTrackerCard.getChildren().size() >= 2) {
             java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy");
             String start = trip.getStartDate().format(fmt);
@@ -135,8 +129,110 @@ public class TripDetailController {
                             ((Label) weatherCard.getChildren().get(1)).setText(temp);
                         }
                     });
+                }).exceptionally(ex -> {
+                    ex.printStackTrace();
+                    javafx.application.Platform.runLater(() -> {
+                        if (weatherCard.getChildren().size() >= 2) {
+                            ((Label) weatherCard.getChildren().get(1)).setText("N/A");
+                        }
+                    });
+                    return null;
                 });
             }
+        }
+
+        if (budgetCard != null) {
+            budgetCard.setOnMouseClicked(event -> handleBudgetClick());
+            budgetCard.setStyle(budgetCard.getStyle() + "; -fx-cursor: hand;");
+
+            com.isep.smarttripplanner.repository.AppConfigRepository cfgRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
+            com.isep.smarttripplanner.service.ExchangeRateService exService = new com.isep.smarttripplanner.service.ExchangeRateService();
+
+            try {
+                com.isep.smarttripplanner.model.AppConfig cfg = cfgRepo.getConfig();
+                String sourceCurrency;
+                if (trip.getCurrency() != null) {
+                    sourceCurrency = trip.getCurrency();
+                } else {
+                    sourceCurrency = cfg.getDefaultCurrency();
+                }
+                String target = cfg.getTargetCurrency();
+
+                exService.getExchangeRate(sourceCurrency, target).thenAccept(rate -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (budgetCard.getChildren().size() >= 2) {
+                            com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
+                            java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
+                                    .findExpensesByTripId(trip.getId());
+                            double totalSpentSrc = expenses.stream()
+                                    .mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount).sum();
+                            double remainingSrc = trip.getBudget() - totalSpentSrc;
+
+                            double convertedRemaining = remainingSrc * rate;
+                            double convertedTotal = trip.getBudget() * rate;
+
+                            String sym = target;
+                            try {
+                                sym = java.util.Currency.getInstance(target).getSymbol();
+                            } catch (Exception e) {
+                            }
+                            ((Label) budgetCard.getChildren().get(1)).setText(
+                                    String.format("Rem: %s%.0f / Tot: %s%.0f", sym, convertedRemaining, sym,
+                                            convertedTotal));
+                        }
+                    });
+                }).exceptionally(ex -> {
+                    ex.printStackTrace();
+                    javafx.application.Platform.runLater(() -> {
+                        if (budgetCard.getChildren().size() >= 2) {
+                            ((Label) budgetCard.getChildren().get(1)).setText("Error");
+                        }
+                    });
+                    return null;
+                });
+            } catch (Exception e) {
+            }
+        }
+
+        if (todoCard != null)
+
+        {
+            todoCard.setOnMouseClicked(event -> handleTodoClick());
+            todoCard.setStyle(todoCard.getStyle() + "; -fx-cursor: hand;");
+        }
+    }
+
+    private void handleBudgetClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/isep/smarttripplanner/views/budget-view.fxml"));
+            javafx.scene.Node view = loader.load();
+
+            com.isep.smarttripplanner.controller.BudgetController controller = loader.getController();
+            controller.initData(trip);
+
+            com.isep.smarttripplanner.controller.RootController.getInstance().loadView(view);
+        } catch (java.io.IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Failed to load Budget view: " + e.getMessage());
+            alert.show();
+        }
+    }
+
+    private void handleTodoClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/isep/smarttripplanner/views/todo-view.fxml"));
+            javafx.scene.Node view = loader.load();
+
+            com.isep.smarttripplanner.controller.TodoController controller = loader.getController();
+            controller.initData(trip);
+
+            com.isep.smarttripplanner.controller.RootController.getInstance().loadView(view);
+        } catch (java.io.IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Failed to load Todo view: " + e.getMessage());
+            alert.show();
         }
     }
 
@@ -149,7 +245,6 @@ public class TripDetailController {
             com.isep.smarttripplanner.controller.RootController.getInstance()
                     .loadView("/com/isep/smarttripplanner/views/weather-view.fxml");
         } catch (Exception e) {
-            e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Could not load Weather View: " + e.getMessage());
             alert.show();
@@ -170,12 +265,10 @@ public class TripDetailController {
             try {
                 TripRepository repo = new TripRepository();
                 repo.deleteTrip(trip.getId());
-                System.out.println("Trip deleted: " + trip.getId());
 
                 handleBack();
 
             } catch (Exception e) {
-                e.printStackTrace();
                 Alert error = new Alert(Alert.AlertType.ERROR);
                 error.setContentText("Failed to delete trip: " + e.getMessage());
                 error.show();
@@ -198,12 +291,10 @@ public class TripDetailController {
                 TripRepository repo = new TripRepository();
                 trip.setStatus(com.isep.smarttripplanner.model.TripStatus.COMPLETED);
                 repo.updateTrip(trip);
-                System.out.println("Trip marked as COMPLETED: " + trip.getId());
 
                 handleBack();
 
             } catch (Exception e) {
-                e.printStackTrace();
                 Alert error = new Alert(Alert.AlertType.ERROR);
                 error.setContentText("Failed to complete trip: " + e.getMessage());
                 error.show();
@@ -227,7 +318,6 @@ public class TripDetailController {
             com.isep.smarttripplanner.controller.RootController.getInstance().loadView(view);
 
         } catch (java.io.IOException e) {
-            e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Failed to load Edit Trip view: " + e.getMessage());
             alert.show();
@@ -304,6 +394,10 @@ public class TripDetailController {
             cardSize = 100;
 
         setCardSize(budgetCard, cardSize);
+        if (budgetCard != null) {
+            budgetCard.setPrefWidth(cardSize * 1.95);
+        }
+
         setCardSize(dayTrackerCard, cardSize);
         setCardSize(weatherCard, cardSize);
         setCardSize(endDateCard, cardSize);
@@ -347,7 +441,6 @@ public class TripDetailController {
             com.isep.smarttripplanner.controller.RootController.getInstance()
                     .loadView("/com/isep/smarttripplanner/views/home-view.fxml");
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

@@ -92,7 +92,6 @@ public class OpenMeteoService implements IWeatherService {
                 return new WeatherData(temp, desc, iconUrl, displayCity, displayArea, pinCode, windSpeed, humidity,
                         dailyForecasts);
             } catch (Exception e) {
-                e.printStackTrace();
                 return new WeatherData(0.0, "Error", "", "Error", "", "", 0.0, 0, new java.util.ArrayList<>());
             }
         });

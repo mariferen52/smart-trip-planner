@@ -71,10 +71,70 @@ public class TripController {
 
     private void loadDashboardData() {
         TripRepository repo = new TripRepository();
+        com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
+        com.isep.smarttripplanner.service.ExchangeRateService exchangeService = new com.isep.smarttripplanner.service.ExchangeRateService();
+
         try {
             this.currentActiveTrip = repo.findActiveTrip();
-            System.out.println("TripController: loadDashboardData called. Active Trip found: "
-                    + (currentActiveTrip != null ? currentActiveTrip.getTitle() : "NONE"));
+            com.isep.smarttripplanner.model.AppConfig config = configRepo.getConfig();
+
+            String homeCurrency;
+            if (currentActiveTrip != null && currentActiveTrip.getCurrency() != null) {
+                homeCurrency = currentActiveTrip.getCurrency();
+            } else {
+                homeCurrency = config.getDefaultCurrency();
+            }
+
+            String targetCurrency = config.getTargetCurrency();
+
+            if (homeCurrency.equals(targetCurrency)) {
+                if (!config.getDefaultCurrency().equals(targetCurrency)) {
+                    homeCurrency = config.getDefaultCurrency();
+                }
+            }
+
+            updateCard(currencyCard, "Loading...", homeCurrency + " -> " + targetCurrency);
+
+            String finalHomeCurrency = homeCurrency;
+            exchangeService.getExchangeRate(homeCurrency, targetCurrency)
+                    .thenAccept(rate -> {
+                        javafx.application.Platform.runLater(() -> {
+                            updateCard(currencyCard, String.format("1 = %.2f", rate),
+                                    finalHomeCurrency + " -> " + targetCurrency);
+
+                            if (currentActiveTrip != null && budgetCard != null) {
+                                com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
+                                java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
+                                        .findExpensesByTripId(currentActiveTrip.getId());
+                                double totalSpentSrc = expenses.stream()
+                                        .mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount).sum();
+                                double remainingSrc = currentActiveTrip.getBudget() - totalSpentSrc;
+
+                                double budgetRate = rate;
+                                String tripCurrency = currentActiveTrip.getCurrency() != null
+                                        ? currentActiveTrip.getCurrency()
+                                        : config.getDefaultCurrency();
+
+                                if (!tripCurrency.equals(finalHomeCurrency)) {
+                                    budgetRate = 1.0;
+                                }
+
+                                double convertedBudget = currentActiveTrip.getBudget() * budgetRate;
+                                double convertedRemaining = remainingSrc * budgetRate;
+
+                                String symbol = getCurrencySymbol(targetCurrency);
+
+                                updateCard(budgetCard, String.format("Rem: %s%.0f", symbol, convertedRemaining),
+                                        String.format("Tot: %s%.0f", symbol, convertedBudget));
+                            }
+                        });
+                    }).exceptionally(ex -> {
+
+                        javafx.application.Platform.runLater(() -> {
+                            updateCard(currencyCard, "Error", "Check Net");
+                        });
+                        return null;
+                    });
 
             if (currentActiveTrip != null) {
                 activeTripContainer.setVisible(true);
@@ -86,7 +146,17 @@ public class TripController {
 
                 tripTitle.setText(currentActiveTrip.getTitle());
 
-                updateCard(budgetCard, String.format("$%.2f", currentActiveTrip.getBudget()), "Total");
+                String anchorSymbol = getCurrencySymbol(homeCurrency);
+
+                com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
+                java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
+                        .findExpensesByTripId(currentActiveTrip.getId());
+                double totalSpent = expenses.stream().mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount)
+                        .sum();
+                double remaining = currentActiveTrip.getBudget() - totalSpent;
+
+                updateCard(budgetCard, String.format("Rem: %s%.0f", anchorSymbol, remaining),
+                        String.format("Tot: %s%.0f", anchorSymbol, currentActiveTrip.getBudget()));
 
                 java.time.LocalDate now = java.time.LocalDate.now();
                 java.time.LocalDate start = currentActiveTrip.getStartDate();
@@ -118,7 +188,6 @@ public class TripController {
                             com.isep.smarttripplanner.controller.RootController.getInstance()
                                     .loadView("/com/isep/smarttripplanner/views/weather-view.fxml");
                         } catch (Exception e) {
-                            e.printStackTrace();
                         }
                     });
                     weatherCard.setStyle(weatherCard.getStyle() + "; -fx-cursor: hand;");
@@ -132,11 +201,11 @@ public class TripController {
                                     if (desc != null && !desc.isEmpty()) {
                                         desc = desc.substring(0, 1).toUpperCase() + desc.substring(1);
                                     }
-                                    System.out.println("DEBUG: Weather updated on Dashboard: " + temp + ", " + desc);
+
                                     updateCard(weatherCard, temp, desc);
                                 });
                             }).exceptionally(ex -> {
-                                ex.printStackTrace();
+
                                 javafx.application.Platform.runLater(() -> {
                                     updateCard(weatherCard, "--", "Error");
                                 });
@@ -154,8 +223,63 @@ public class TripController {
                 createTripButton.setVisible(true);
                 createTripButton.setManaged(true);
             }
+
+            checkDailySummary(configRepo, currentActiveTrip);
+
         } catch (Exception e) {
-            e.printStackTrace();
+        }
+    }
+
+    private void checkDailySummary(com.isep.smarttripplanner.repository.AppConfigRepository configRepo, Trip trip) {
+        if (trip == null)
+            return;
+
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalTime time = now.toLocalTime();
+        java.time.LocalDate today = now.toLocalDate();
+
+        boolean isNight = time.isAfter(java.time.LocalTime.of(23, 0)) || time.isBefore(java.time.LocalTime.of(6, 0));
+
+        if (isNight) {
+            com.isep.smarttripplanner.model.AppConfig config = configRepo.getConfig();
+            java.time.LocalDate lastDate = config.getLastSummaryDate();
+
+            if (lastDate == null || !lastDate.equals(today)) {
+
+                boolean isFinalDay = today.equals(trip.getTripEndDate()) || today.isAfter(trip.getTripEndDate());
+
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(
+                                getClass().getResource("/com/isep/smarttripplanner/views/daily-summary-view.fxml"));
+                        Parent root = loader.load();
+
+                        com.isep.smarttripplanner.controller.SummaryController controller = loader.getController();
+                        javafx.stage.Stage stage = new javafx.stage.Stage();
+                        controller.setStage(stage);
+                        controller.initData(trip, isFinalDay);
+
+                        stage.setScene(new javafx.scene.Scene(root));
+                        stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+                        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                        stage.show();
+
+                        config.setLastSummaryDate(today);
+                        configRepo.saveConfig(config);
+
+                    } catch (IOException e) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    private String getCurrencySymbol(String code) {
+        try {
+            return java.util.Currency.getInstance(code).getSymbol();
+        } catch (Exception e) {
+            return code + " ";
         }
     }
 
@@ -166,11 +290,10 @@ public class TripController {
                 TripRepository repo = new TripRepository();
                 currentActiveTrip.setStatus(com.isep.smarttripplanner.model.TripStatus.COMPLETED);
                 repo.updateTrip(currentActiveTrip);
-                System.out.println("Trip marked as COMPLETED: " + currentActiveTrip.getId());
 
                 loadDashboardData();
             } catch (Exception e) {
-                e.printStackTrace();
+
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setContentText("Could not complete trip: " + e.getMessage());
@@ -181,9 +304,8 @@ public class TripController {
 
     @FXML
     private void openTripDetails() {
-        System.out.println("DEBUG: openTripDetails CLICKED!");
         try {
-            System.out.println("DEBUG: Loading trip-details-view.fxml...");
+
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                     getClass().getResource("/com/isep/smarttripplanner/views/trip-details-view.fxml"));
             javafx.scene.Node view = loader.load();
@@ -191,10 +313,8 @@ public class TripController {
             com.isep.smarttripplanner.controller.TripDetailController controller = loader.getController();
             controller.setTrip(currentActiveTrip);
 
-            System.out.println("DEBUG: Switching View...");
             homeView.getChildren().setAll(view);
         } catch (java.io.IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -281,7 +401,7 @@ public class TripController {
             AnchorPane.setLeftAnchor(creationView, 0.0);
             AnchorPane.setRightAnchor(creationView, 0.0);
         } else {
-            System.err.println("CRITICAL: homeView has no parent or parent is not an AnchorPane!");
+
         }
     }
 

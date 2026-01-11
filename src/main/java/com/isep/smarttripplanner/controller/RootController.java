@@ -14,10 +14,8 @@ import javafx.stage.Stage;
 import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
-import com.isep.smarttripplanner.controller.TripController;
 import com.isep.smarttripplanner.repository.TripRepository;
 import com.isep.smarttripplanner.model.Trip;
-import com.isep.smarttripplanner.controller.TripDetailController;
 
 public class RootController {
 
@@ -122,12 +120,10 @@ public class RootController {
     }
 
     private void homeView() throws IOException {
-        if (cachedHomeView == null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("views/home-view.fxml"));
-            cachedHomeView = fxmlLoader.load();
-            TripController controller = fxmlLoader.getController();
-            controller.getMainContent(mainContent);
-        }
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("views/home-view.fxml"));
+        cachedHomeView = fxmlLoader.load();
+        TripController controller = fxmlLoader.getController();
+        controller.getMainContent(mainContent);
         mainContent.getChildren().setAll(cachedHomeView);
 
         AnchorPane.setBottomAnchor(cachedHomeView, 0.0);
@@ -138,20 +134,17 @@ public class RootController {
 
     public void loadView(String fxmlPath) {
         try {
-            System.out.println("Loading view: " + fxmlPath);
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             javafx.scene.Node view = loader.load();
 
             if (view == null) {
-                System.err.println("View is null for path: " + fxmlPath);
+
                 return;
             }
 
             loadView(view);
 
         } catch (IOException e) {
-            System.err.println("Error loading FXML: " + fxmlPath);
-            e.printStackTrace();
         }
     }
 
@@ -167,19 +160,18 @@ public class RootController {
 
     @FXML
     public void showProfile() {
-        System.out.println("DEBUG: showProfile invoked");
+
         loadView("/com/isep/smarttripplanner/views/profile-view.fxml");
     }
 
     @FXML
     public void showMyTrip() {
-        System.out.println("DEBUG: showMyTrip invoked");
+
         try {
             TripRepository repo = new TripRepository();
             Trip activeTrip = repo.findActiveTrip();
 
             if (activeTrip != null) {
-                // Load details view
                 FXMLLoader loader = new FXMLLoader(
                         getClass().getResource("/com/isep/smarttripplanner/views/trip-details-view.fxml"));
                 javafx.scene.Node view = loader.load();
@@ -193,25 +185,35 @@ public class RootController {
                 AnchorPane.setLeftAnchor(view, 0.0);
                 AnchorPane.setRightAnchor(view, 0.0);
             } else {
-                // No trip -> Go to Home
-                System.out.println("No active trip found, redirecting to Home.");
+
                 changeToHomeView();
             }
         } catch (Exception e) {
-            e.printStackTrace();
             loadView("/com/isep/smarttripplanner/views/home-view.fxml");
         }
     }
 
     @FXML
     public void showTripHistory() {
-        System.out.println("DEBUG: showTripHistory invoked");
+
         loadView("/com/isep/smarttripplanner/views/trip-history-view.fxml");
     }
 
     public void showWeatherView() {
-        System.out.println("DEBUG: showWeatherView invoked");
+
         loadView("/com/isep/smarttripplanner/views/weather-view.fxml");
+    }
+
+    @FXML
+    public void showSettings() {
+
+        loadView("/com/isep/smarttripplanner/views/settings-view.fxml");
+    }
+
+    @FXML
+    public void showTotalBudget() {
+
+        loadView("/com/isep/smarttripplanner/views/total-budget-view.fxml");
     }
 
     private void setLabelSize(Label button, Region buttonIcon, double fontSize) {
@@ -300,7 +302,7 @@ public class RootController {
 
     @FXML
     private void expandSideDrawer() {
-        double padding = fontSize / 2;
+
         if (!isExpanded) {
             isExpanded = true;
             updateSideDrawer(sideDrawer);
