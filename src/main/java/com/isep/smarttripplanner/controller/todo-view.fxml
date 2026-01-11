@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.isep.smarttripplanner.controller.TodoController" style="-fx-padding: 20;">
+    
+    <Label text="Trip To-Do List" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    
+    <HBox spacing="10" alignment="CENTER">
+        <TextField fx:id="newTaskField" promptText="What needs to be done?" prefWidth="200"/>
+        <DatePicker fx:id="dueDatePicker" promptText="Due Date"/>
+        <Button text="Add Task" onAction="#handleAddTask" style="-fx-base: #2196f3; -fx-text-fill: white;"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" prefHeight="300">
+        <VBox fx:id="todoListContainer" spacing="10" style="-fx-padding: 10;"/>
+    </ScrollPane>
+</VBox>
