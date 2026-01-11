@@ -10,12 +10,14 @@ public class Trip {
     private LocalDate tripStartDate;
     private LocalDate tripEndDate;
     private double budget;
+    private String currency = "USD";
     private TripStatus status = TripStatus.PLANNED;
     private List<Destination> destinations;
 
-    public Trip(){}
+    public Trip() {
+    }
 
-    public Trip(String title, LocalDate startDate, LocalDate endDate, double budget, List<Destination> destinations){
+    public Trip(String title, LocalDate startDate, LocalDate endDate, double budget, List<Destination> destinations) {
         this.id = UUID.randomUUID().toString();
         this.title = title;
         this.tripStartDate = startDate;
@@ -28,7 +30,7 @@ public class Trip {
         return id;
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return title;
     }
 
@@ -58,6 +60,14 @@ public class Trip {
 
     public void setBudget(double budget) {
         this.budget = budget;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public void setDestinations(List<Destination> destinations) {

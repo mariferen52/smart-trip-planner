@@ -1,18 +1,20 @@
 package com.isep.smarttripplanner.controller;
 
+import com.isep.smarttripplanner.MainApplication;
 import com.isep.smarttripplanner.model.Destination;
+import com.isep.smarttripplanner.model.Trip;
+import com.isep.smarttripplanner.repository.TripRepository;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -20,16 +22,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import com.isep.smarttripplanner.MainApplication;
-import com.isep.smarttripplanner.model.Trip;
-import com.isep.smarttripplanner.repository.TripRepository;
-
 public class TripCreationController {
 
     @FXML
     private VBox tripTitle;
-    @FXML
-    private VBox budgetTitle;
+
     @FXML
     private VBox startDate;
     @FXML
@@ -50,8 +47,7 @@ public class TripCreationController {
     private Label lblTripEndDate;
     @FXML
     private TextField tripTitleInput;
-    @FXML
-    private TextField tripBudgetInput;
+
     @FXML
     private Button saveButton;
     @FXML
@@ -62,7 +58,6 @@ public class TripCreationController {
     @FXML
     private void initialize() {
         if (tripCreationView == null) {
-            System.err.println("CRITICAL: tripCreationView is NULL. FXML Injection failed.");
             return;
         }
 
@@ -96,14 +91,12 @@ public class TripCreationController {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/isep/smarttripplanner/views/add-destination-view.fxml"));
 
-            // Load the FXML to get the root node and initialize the controller
             javafx.scene.Node content = loader.load();
             DialogPane dialogPane = new DialogPane();
             dialogPane.setContent(content);
 
             AddDestinationController controller = loader.getController();
 
-            // Fetch conflicting dates from CURRENT trip destinations
             java.util.List<javafx.util.Pair<LocalDate, LocalDate>> occupiedRanges = new java.util.ArrayList<>();
             for (Destination d : destinationList) {
                 if (d.getDestinationStartDate() != null && d.getDestinationEndDate() != null) {
@@ -171,33 +164,19 @@ public class TripCreationController {
     public void setTrip(Trip trip) {
         this.editingTrip = trip;
         tripTitleInput.setText(trip.getTitle());
-        tripBudgetInput.setText(String.valueOf(trip.getBudget()));
         destinationList.setAll(trip.getDestinations());
         saveButton.setText("Apply Changes");
 
-        // Update header if possible
         if (tripCreationView.getParent() != null) {
-            // Optional: update title label if it existed
         }
     }
 
     @FXML
     public void onSaveTrip() {
         String title = tripTitleInput.getText();
-        String budgetStr = tripBudgetInput.getText();
 
         if (title == null || title.trim().isEmpty()) {
             showAlert("Validation Error", "Please enter a trip title.");
-            return;
-        }
-
-        double budget = 0.0;
-        try {
-            if (budgetStr != null && !budgetStr.trim().isEmpty()) {
-                budget = Double.parseDouble(budgetStr);
-            }
-        } catch (NumberFormatException e) {
-            showAlert("Validation Error", "Invalid budget format. Please enter a number.");
             return;
         }
 
@@ -221,10 +200,8 @@ public class TripCreationController {
             }
         }
 
-        // If editing, verify we aren't creating a new object with a new ID
         if (editingTrip != null) {
             editingTrip.setTitle(title);
-            editingTrip.setBudget(budget);
             editingTrip.setStartDate(minDate);
             editingTrip.setTripEndDate(maxDate);
             editingTrip.setDestinations(new java.util.ArrayList<>(destinationList));
@@ -232,22 +209,27 @@ public class TripCreationController {
             try {
                 TripRepository repo = new TripRepository();
                 repo.updateTrip(editingTrip);
-                System.out.println("TripCreationController: Trip updated: " + editingTrip.getTitle());
+
                 returnToHome();
             } catch (Exception e) {
-                e.printStackTrace();
                 showAlert("Error", "Could not update trip: " + e.getMessage());
             }
         } else {
-            // New Trip
-            Trip newTrip = new Trip(title, minDate, maxDate, budget, new java.util.ArrayList<>(destinationList));
+            double initialBudget = 0.0;
+            Trip newTrip = new Trip(title, minDate, maxDate, initialBudget, new java.util.ArrayList<>(destinationList));
+
+            try {
+                com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
+                newTrip.setCurrency(configRepo.getConfig().getDefaultCurrency());
+            } catch (Exception e) {
+                newTrip.setCurrency("USD");
+            }
             try {
                 TripRepository repo = new TripRepository();
                 repo.insertTrip(newTrip);
-                System.out.println("TripCreationController: Trip saved successfully: " + newTrip.getTitle());
+
                 returnToHome();
             } catch (Exception e) {
-                e.printStackTrace();
                 showAlert("Error", "Could not save trip: " + e.getMessage());
             }
         }
@@ -272,7 +254,7 @@ public class TripCreationController {
                 AnchorPane.setLeftAnchor(homeView, 0.0);
                 AnchorPane.setRightAnchor(homeView, 0.0);
             } else {
-                System.err.println("CRITICAL: Trip Creation View has no parent (AnchorPane)!");
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -314,7 +296,7 @@ public class TripCreationController {
                                 "-fx-font-size: " + (fontSize * 0.3)
                                 + "px; ");
                     } else if (child instanceof TableView<?> table) {
-                        for (TableColumn col : table.getColumns()) {
+                        for (TableColumn<?, ?> col : table.getColumns()) {
                             col.setStyle("-fx-font-size: " + (fontSize * 0.3)
                                     + "px; -fx-font-weight: bold; ");
                         }

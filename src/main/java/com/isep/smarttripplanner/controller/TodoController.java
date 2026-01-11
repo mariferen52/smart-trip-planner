@@ -45,12 +45,28 @@ public class TodoController {
         todoListContainer.getChildren().clear();
         List<TodoItem> items = todoRepository.findTodosByTripId(currentTrip.getId());
         for (TodoItem item : items) {
-            CheckBox checkBox = new CheckBox(
-                    item.getDescription() + (item.getDueDate() != null ? " (Due: " + item.getDueDate() + ")" : ""));
+            boolean isOverdue = item.getDueDate() != null
+                    && item.getDueDate().isBefore(java.time.LocalDate.now())
+                    && !item.isCompleted();
+
+            String dueText = item.getDueDate() != null ? " (Due: " + item.getDueDate() + ")" : "";
+            if (isOverdue) {
+                dueText += " - OVERDUE";
+            }
+
+            CheckBox checkBox = new CheckBox(item.getDescription() + dueText);
             checkBox.setSelected(item.isCompleted());
+
+            if (isOverdue) {
+                checkBox.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+            } else if (item.isCompleted()) {
+                checkBox.setStyle("-fx-text-fill: grey; -fx-opacity: 0.7;");
+            }
+
             checkBox.setOnAction(event -> {
                 item.setCompleted(checkBox.isSelected());
                 todoRepository.updateTodo(item);
+                refreshTodoList();
             });
             todoListContainer.getChildren().add(checkBox);
         }

@@ -24,8 +24,6 @@ public class WeatherData {
         this.dailyForecasts = dailyForecasts;
     }
 
-    // ... existing getters ...
-
     public double getTemperature() {
         return temperature;
     }

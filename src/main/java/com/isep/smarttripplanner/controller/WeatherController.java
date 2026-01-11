@@ -26,17 +26,9 @@ public class WeatherController {
     @FXML
     private Label humidityLabel;
     @FXML
-    private Label visibilityLabel;
-    @FXML
-    private Label pressureLabel;
-    @FXML
-    private Label uvLabel;
-    @FXML
     private javafx.scene.layout.HBox forecastContainer;
 
     private static String city;
-    private static String temp;
-    private static String desc;
 
     private static double latitude;
     private static double longitude;
@@ -52,8 +44,6 @@ public class WeatherController {
         WeatherController.latitude = latitude;
         WeatherController.longitude = longitude;
         WeatherController.currentTrip = null;
-        WeatherController.temp = "--";
-        WeatherController.desc = "Loading...";
     }
 
     @FXML
@@ -199,7 +189,7 @@ public class WeatherController {
             try {
                 weatherIconView.setImage(new Image(icon));
             } catch (Exception e) {
-                System.err.println("Failed to load icon");
+
             }
         }
     }
@@ -264,7 +254,6 @@ public class WeatherController {
             com.isep.smarttripplanner.controller.RootController.getInstance()
                     .loadView("/com/isep/smarttripplanner/views/home-view.fxml");
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

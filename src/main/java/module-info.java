@@ -1,9 +1,9 @@
 module com.isep.smarttripplanner {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires javafx.web;
+    requires transitive javafx.controls;
+    requires transitive javafx.fxml;
+    requires transitive javafx.web;
     requires jdk.jsobject;
-    requires com.google.gson;
+    requires transitive com.google.gson;
     requires java.net.http;
     requires java.desktop;
     requires jdk.compiler;

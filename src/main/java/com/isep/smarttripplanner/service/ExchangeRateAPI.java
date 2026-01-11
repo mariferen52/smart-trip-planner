@@ -18,7 +18,7 @@ public class ExchangeRateAPI implements ICurrencyService {
     @Override
     public CompletableFuture<CurrencyData> getExchangeRate(String fromCurrency, String toCurrency) {
         if (API_KEY.equals("YOUR_API_KEY")) {
-            // Demo Mode: Return mock exchange rates
+
             double mockRate = getMockExchangeRate(fromCurrency, toCurrency);
             String lastUpdated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             return CompletableFuture.completedFuture(
@@ -37,25 +37,35 @@ public class ExchangeRateAPI implements ICurrencyService {
                 .thenApply(response -> {
                     JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
                     double rate = json.get("conversion_rate").getAsDouble();
-                    String timeLastUpdate = json.has("time_last_update_utc") 
-                            ? json.get("time_last_update_utc").getAsString() 
+                    String timeLastUpdate = json.has("time_last_update_utc")
+                            ? json.get("time_last_update_utc").getAsString()
                             : LocalDateTime.now().toString();
                     return new CurrencyData(fromCurrency, toCurrency, rate, timeLastUpdate);
                 });
     }
 
     private double getMockExchangeRate(String from, String to) {
-        // Common mock exchange rates
-        if (from.equals("EUR") && to.equals("USD")) return 1.08;
-        if (from.equals("USD") && to.equals("EUR")) return 0.93;
-        if (from.equals("EUR") && to.equals("GBP")) return 0.86;
-        if (from.equals("GBP") && to.equals("EUR")) return 1.16;
-        if (from.equals("USD") && to.equals("GBP")) return 0.79;
-        if (from.equals("GBP") && to.equals("USD")) return 1.27;
-        if (from.equals("EUR") && to.equals("JPY")) return 162.50;
-        if (from.equals("USD") && to.equals("JPY")) return 150.25;
-        if (from.equals("EUR") && to.equals("INR")) return 90.50;
-        if (from.equals("USD") && to.equals("INR")) return 83.75;
-        return 1.0; // Default 1:1 rate
+
+        if (from.equals("EUR") && to.equals("USD"))
+            return 1.08;
+        if (from.equals("USD") && to.equals("EUR"))
+            return 0.93;
+        if (from.equals("EUR") && to.equals("GBP"))
+            return 0.86;
+        if (from.equals("GBP") && to.equals("EUR"))
+            return 1.16;
+        if (from.equals("USD") && to.equals("GBP"))
+            return 0.79;
+        if (from.equals("GBP") && to.equals("USD"))
+            return 1.27;
+        if (from.equals("EUR") && to.equals("JPY"))
+            return 162.50;
+        if (from.equals("USD") && to.equals("JPY"))
+            return 150.25;
+        if (from.equals("EUR") && to.equals("INR"))
+            return 90.50;
+        if (from.equals("USD") && to.equals("INR"))
+            return 83.75;
+        return 1.0;
     }
 }

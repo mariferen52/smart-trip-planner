@@ -33,6 +33,11 @@ public class TripRepository {
                 ")";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+
+            try {
+                stmt.execute("ALTER TABLE trips ADD COLUMN currency TEXT DEFAULT 'USD'");
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -52,16 +57,15 @@ public class TripRepository {
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
 
-            // Attempt to add columns if they don't exist (Migration for existing DB)
             try {
                 stmt.execute("ALTER TABLE destinations ADD COLUMN destination_start_date TEXT");
             } catch (SQLException ignored) {
-            } // Column likely exists
+            }
 
             try {
                 stmt.execute("ALTER TABLE destinations ADD COLUMN destination_end_date TEXT");
             } catch (SQLException ignored) {
-            } // Column likely exists
+            }
         }
     }
 
@@ -88,12 +92,15 @@ public class TripRepository {
         trip.setStartDate(LocalDate.parse(rs.getString("startDate")));
         trip.setTripEndDate(LocalDate.parse(rs.getString("endDate")));
         trip.setBudget(rs.getDouble("budget"));
+        String curr = rs.getString("currency");
+        if (curr != null)
+            trip.setCurrency(curr);
         trip.setStatus(TripStatus.valueOf(rs.getString("status")));
         trip.setDestinations(findDestinationsByTripId(trip.getId()));
     }
 
     public void insertTrip(Trip trip) {
-        String sql = "INSERT INTO trips (id, title, startDate, endDate, budget, status) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO trips (id, title, startDate, endDate, budget, status, currency) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, trip.getId());
             stmt.setString(2, trip.getTitle());
@@ -101,6 +108,7 @@ public class TripRepository {
             stmt.setString(4, trip.getTripEndDate().toString());
             stmt.setDouble(5, trip.getBudget());
             stmt.setString(6, trip.getStatus().name());
+            stmt.setString(7, trip.getCurrency());
             stmt.execute();
             if (trip.getDestinations() != null && !trip.getDestinations().isEmpty()) {
                 insertDestinations(trip);
@@ -217,7 +225,7 @@ public class TripRepository {
     }
 
     public void updateTrip(Trip trip) {
-        String sql = "UPDATE trips SET title = ?, startDate = ?, endDate = ?, budget = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE trips SET title = ?, startDate = ?, endDate = ?, budget = ?, status = ?, currency = ? WHERE id = ?";
         String deleteDestSql = "DELETE FROM destinations WHERE trip_id = ?";
         String insertDestSql = "INSERT INTO destinations(trip_id, name, latitude, longitude, destination_start_date, destination_end_date) VALUES(?, ?, ?, ?, ?, ?)";
 
@@ -229,10 +237,10 @@ public class TripRepository {
                 pstmt.setObject(3, trip.getTripEndDate());
                 pstmt.setDouble(4, trip.getBudget());
                 pstmt.setString(5, trip.getStatus().name());
-                pstmt.setString(6, trip.getId());
+                pstmt.setString(6, trip.getCurrency());
+                pstmt.setString(7, trip.getId());
                 pstmt.executeUpdate();
 
-                // Replace destinations
                 try (java.sql.PreparedStatement delStmt = conn.prepareStatement(deleteDestSql)) {
                     delStmt.setString(1, trip.getId());
                     delStmt.executeUpdate();
@@ -257,13 +265,71 @@ public class TripRepository {
                 throw e;
             }
         } catch (java.sql.SQLException e) {
-            e.printStackTrace();
         } finally {
             try {
                 conn.setAutoCommit(true);
             } catch (java.sql.SQLException e) {
-                e.printStackTrace();
             }
         }
+    }
+
+    public int countTotalTrips() {
+        String sql = "SELECT COUNT(*) FROM trips";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting trips", e);
+        }
+        return 0;
+    }
+
+    public int countCompletedTrips() {
+        String sql = "SELECT COUNT(*) FROM trips WHERE status = 'COMPLETED'";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting completed trips", e);
+        }
+        return 0;
+    }
+
+    public int countPlannedTrips() {
+        String sql = "SELECT COUNT(*) FROM trips WHERE status = 'PLANNED' OR status = 'ONGOING'";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting planned trips", e);
+        }
+        return 0;
+    }
+
+    public double calculateTotalBudget() {
+        String sql = "SELECT SUM(budget) FROM trips";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error calculating total budget", e);
+        }
+        return 0.0;
+    }
+
+    public int countTotalDestinations() {
+        String sql = "SELECT COUNT(*) FROM destinations";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting destinations", e);
+        }
+        return 0;
     }
 }

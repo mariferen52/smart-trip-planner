@@ -30,12 +30,7 @@
                        <Button mnemonicParsing="false" text="Add Destination" onAction="#onAddDestination" />
                    </VBox>
 
-                   <VBox fx:id="budgetTitle" alignment="CENTER_LEFT">
-                       <children>
-                           <Label text="Budget" />
-                           <TextField fx:id="tripBudgetInput" />
-                       </children>
-                   </VBox>
+
 
                    <VBox fx:id="startDate" alignment="CENTER_LEFT">
                        <children>
