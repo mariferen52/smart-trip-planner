@@ -1,4 +1,4 @@
-/* Fluent Weather Inspired Design */
+/* Design */
 .root {
     -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #1e5799 0%, #2989d8 25%, #56c1f5 60%, #87CEEB 100%);
     -fx-background-radius: 0 9 9 0;
@@ -107,7 +107,6 @@
     -fx-cursor: hand;
 }
 
-/* Removed .forecast-item:hover */
 
 .forecast-item-today {
     -fx-background-color: rgba(255, 255, 255, 0.22);

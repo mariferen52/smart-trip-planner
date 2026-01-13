@@ -1,6 +1,6 @@
 package com.isep.smarttripplanner.controller;
 
-import com.isep.smarttripplanner.service.GoogleMapsAPI;
+import com.isep.smarttripplanner.service.MapService;
 import com.isep.smarttripplanner.service.IMapService;
 import com.isep.smarttripplanner.service.IWeatherService;
 import javafx.fxml.FXML;
@@ -43,10 +43,12 @@ public class MapController {
     private static double selectedLat = 48.8566;
     private static double selectedLon = 2.3522;
 
-    private final IMapService mapService = new GoogleMapsAPI();
+    private final IMapService mapService = new MapService();
     private final IWeatherService weatherService = new com.isep.smarttripplanner.service.OpenMeteoService();
 
     public void initialize() {
+        mapWebView.getEngine().setUserAgent(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
         weatherContainer.setOnMouseClicked(e -> {
             if (currentIconUrl != null) {
@@ -62,6 +64,9 @@ public class MapController {
                 netscape.javascript.JSObject window = (netscape.javascript.JSObject) mapWebView.getEngine()
                         .executeScript("window");
                 window.setMember("javaApp", this);
+
+                // Console logging
+                mapWebView.getEngine().executeScript("console.log = function(message) { javaApp.log(message); }");
             }
         });
 

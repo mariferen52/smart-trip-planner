@@ -97,6 +97,19 @@ public class OpenMeteoService implements IWeatherService {
         });
     }
 
+    @Override
+    public CompletableFuture<String> getCityName(double lat, double lon) {
+        return reverseGeocode(lat, lon).thenApply(parts -> {
+            if (parts[0] != null)
+                return parts[0];
+            if (parts[1] != null)
+                return parts[1];
+            if (parts[2] != null)
+                return parts[2];
+            return "Unknown Location";
+        });
+    }
+
     private CompletableFuture<String[]> reverseGeocode(double lat, double lon) {
         String url = String.format(
                 "https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f&zoom=10&addressdetails=1",
@@ -148,6 +161,37 @@ public class OpenMeteoService implements IWeatherService {
             case 95, 96, 99 -> "Thunderstorm";
             default -> "Unknown";
         };
+    }
+
+    @Override
+    public CompletableFuture<double[]> getCoordinates(String city) {
+        String encodedCity = java.net.URLEncoder.encode(city, java.nio.charset.StandardCharsets.UTF_8);
+        String url = String.format(
+                "https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=en&format=json",
+                encodedCity);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("User-Agent", "SmartTripPlanner/1.0")
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    if (response.statusCode() != 200) {
+                        throw new RuntimeException("Geocoding API Error: " + response.statusCode());
+                    }
+                    JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                    if (json.has("results") && json.get("results").isJsonArray()) {
+                        var results = json.getAsJsonArray("results");
+                        if (results.size() > 0) {
+                            JsonObject first = results.get(0).getAsJsonObject();
+                            double lat = first.get("latitude").getAsDouble();
+                            double lon = first.get("longitude").getAsDouble();
+                            return new double[] { lat, lon };
+                        }
+                    }
+                    return null;
+                });
     }
 
     private String getIconUrl(int code, boolean isDay) {

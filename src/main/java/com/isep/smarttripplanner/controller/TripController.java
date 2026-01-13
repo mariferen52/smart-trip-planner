@@ -78,63 +78,80 @@ public class TripController {
             this.currentActiveTrip = repo.findActiveTrip();
             com.isep.smarttripplanner.model.AppConfig config = configRepo.getConfig();
 
-            String homeCurrency;
-            if (currentActiveTrip != null && currentActiveTrip.getCurrency() != null) {
-                homeCurrency = currentActiveTrip.getCurrency();
-            } else {
-                homeCurrency = config.getDefaultCurrency();
-            }
-
+            String widgetBaseCurrency = config.getDefaultCurrency();
             String targetCurrency = config.getTargetCurrency();
 
-            if (homeCurrency.equals(targetCurrency)) {
-                if (!config.getDefaultCurrency().equals(targetCurrency)) {
-                    homeCurrency = config.getDefaultCurrency();
-                }
+            if (widgetBaseCurrency.equals(targetCurrency)) {
+                updateCard(currencyCard, "1 = 1.00", widgetBaseCurrency + " -> " + targetCurrency);
+            } else {
+                exchangeService.getExchangeRate(widgetBaseCurrency, targetCurrency)
+                        .thenAccept(rate -> {
+                            javafx.application.Platform.runLater(() -> {
+                                updateCard(currencyCard, String.format("1 = %.2f", rate),
+                                        widgetBaseCurrency + " -> " + targetCurrency);
+                            });
+                        }).exceptionally(ex -> {
+                            javafx.application.Platform.runLater(() -> {
+                                updateCard(currencyCard, "Error", "Check Net");
+                            });
+                            return null;
+                        });
             }
+            if (currentActiveTrip != null && budgetCard != null) {
+                com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
+                java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
+                        .findExpensesByTripId(currentActiveTrip.getId());
+                double totalSpentSrc = expenses.stream()
+                        .mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount).sum();
+                double remainingSrc = currentActiveTrip.getBudget() - totalSpentSrc;
 
-            updateCard(currencyCard, "Loading...", homeCurrency + " -> " + targetCurrency);
+                String tripCurrency = currentActiveTrip.getCurrency() != null
+                        ? currentActiveTrip.getCurrency()
+                        : "USD";
 
-            String finalHomeCurrency = homeCurrency;
-            exchangeService.getExchangeRate(homeCurrency, targetCurrency)
-                    .thenAccept(rate -> {
+                if (tripCurrency.equals(targetCurrency)) {
+                    javafx.application.Platform.runLater(() -> {
+                        String symbol = getCurrencySymbol(targetCurrency);
+                        updateCard(budgetCard, String.format("Rem: %s%.0f", symbol, remainingSrc),
+                                String.format("Tot: %s%.0f", symbol, currentActiveTrip.getBudget()));
+                    });
+                } else if (tripCurrency.equals(widgetBaseCurrency)) {
+                    // Trip is Home. Rate = Home -> Target
+                    exchangeService.getExchangeRate(widgetBaseCurrency, targetCurrency).thenAccept(rate -> {
                         javafx.application.Platform.runLater(() -> {
-                            updateCard(currencyCard, String.format("1 = %.2f", rate),
-                                    finalHomeCurrency + " -> " + targetCurrency);
-
-                            if (currentActiveTrip != null && budgetCard != null) {
-                                com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
-                                java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
-                                        .findExpensesByTripId(currentActiveTrip.getId());
-                                double totalSpentSrc = expenses.stream()
-                                        .mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount).sum();
-                                double remainingSrc = currentActiveTrip.getBudget() - totalSpentSrc;
-
-                                double budgetRate = rate;
-                                String tripCurrency = currentActiveTrip.getCurrency() != null
-                                        ? currentActiveTrip.getCurrency()
-                                        : config.getDefaultCurrency();
-
-                                if (!tripCurrency.equals(finalHomeCurrency)) {
-                                    budgetRate = 1.0;
-                                }
-
-                                double convertedBudget = currentActiveTrip.getBudget() * budgetRate;
-                                double convertedRemaining = remainingSrc * budgetRate;
-
-                                String symbol = getCurrencySymbol(targetCurrency);
-
-                                updateCard(budgetCard, String.format("Rem: %s%.0f", symbol, convertedRemaining),
-                                        String.format("Tot: %s%.0f", symbol, convertedBudget));
-                            }
+                            updateBudgetCardUI(currentActiveTrip.getBudget(), remainingSrc, rate, targetCurrency);
                         });
                     }).exceptionally(ex -> {
-
-                        javafx.application.Platform.runLater(() -> {
-                            updateCard(currencyCard, "Error", "Check Net");
-                        });
+                        javafx.application.Platform.runLater(() -> updateCard(budgetCard, "Error", "Check Net"));
                         return null;
                     });
+                } else if (targetCurrency.equals(widgetBaseCurrency)) {
+                    // Target is Home. Rate = Trip -> Home = 1 / (Home -> Trip)
+                    exchangeService.getExchangeRate(widgetBaseCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                        double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
+                        javafx.application.Platform.runLater(() -> {
+                            updateBudgetCardUI(currentActiveTrip.getBudget(), remainingSrc, rate, targetCurrency);
+                        });
+                    }).exceptionally(ex -> {
+                        javafx.application.Platform.runLater(() -> updateCard(budgetCard, "Error", "Check Net"));
+                        return null;
+                    });
+                } else {
+                    exchangeService.getExchangeRate(widgetBaseCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                        exchangeService.getExchangeRate(widgetBaseCurrency, targetCurrency)
+                                .thenAccept(rateHomeToTarget -> {
+                                    double rate = (rateHomeToTrip == 0) ? 0 : (rateHomeToTarget / rateHomeToTrip);
+                                    javafx.application.Platform.runLater(() -> {
+                                        updateBudgetCardUI(currentActiveTrip.getBudget(), remainingSrc, rate,
+                                                targetCurrency);
+                                    });
+                                });
+                    }).exceptionally(ex -> {
+                        javafx.application.Platform.runLater(() -> updateCard(budgetCard, "Error", "Check Net"));
+                        return null;
+                    });
+                }
+            }
 
             if (currentActiveTrip != null) {
                 activeTripContainer.setVisible(true);
@@ -146,7 +163,8 @@ public class TripController {
 
                 tripTitle.setText(currentActiveTrip.getTitle());
 
-                String anchorSymbol = getCurrencySymbol(homeCurrency);
+                String anchorSymbol = getCurrencySymbol(
+                        currentActiveTrip.getCurrency() != null ? currentActiveTrip.getCurrency() : "USD");
 
                 com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
                 java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
@@ -332,6 +350,16 @@ public class TripController {
                 index++;
             }
         }
+    }
+
+    private void updateBudgetCardUI(double budgetSrc, double remainingSrc, double rate, String targetCurrency) {
+        double convertedBudget = budgetSrc * rate;
+        double convertedRemaining = remainingSrc * rate;
+
+        String symbol = getCurrencySymbol(targetCurrency);
+
+        updateCard(budgetCard, String.format("Rem: %s%.0f", symbol, convertedRemaining),
+                String.format("Tot: %s%.0f", symbol, convertedBudget));
     }
 
     @FXML

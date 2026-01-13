@@ -25,7 +25,7 @@
                   <FlowPane fx:id="cardsContainer" hgap="15" vgap="15" prefWrapLength="450" alignment="CENTER">
                       <children>
 
-                        <VBox fx:id="budgetCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                        <VBox fx:id="budgetCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: #E57373; -fx-background-radius: 20; -fx-padding: 10; -fx-cursor: hand;">
                            <children>
                               <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Budget" textFill="white" />
                               <Label style="-fx-font-size: 22; -fx-font-weight: bold;" text="--" textFill="white" />
@@ -33,7 +33,7 @@
                         </VBox>
 
 
-                        <VBox fx:id="weatherCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                        <VBox fx:id="weatherCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: #4DB6AC; -fx-background-radius: 20; -fx-padding: 10; -fx-cursor: hand;">
                            <children>
                                <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Weather" textFill="white" />
                               <Label style="-fx-font-size: 22; -fx-font-weight: bold;" text="--" textFill="white" />
@@ -41,7 +41,7 @@
                         </VBox>
 
 
-                        <VBox fx:id="dayTrackerCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                        <VBox fx:id="dayTrackerCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: #81C784; -fx-background-radius: 20; -fx-padding: 10; -fx-cursor: hand;">
                            <children>
                               <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Start Date" textFill="white" />
                               <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="--" textFill="white" wrapText="true" textAlignment="CENTER"/>
@@ -49,7 +49,7 @@
                         </VBox>
 
 
-                         <VBox fx:id="endDateCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                         <VBox fx:id="endDateCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: #FFB74D; -fx-background-radius: 20; -fx-padding: 10; -fx-cursor: hand;">
                             <children>
                                <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="End Date" textFill="white" />
                                <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="--" textFill="white" />
@@ -57,7 +57,7 @@
                          </VBox>
 
 
-                         <VBox fx:id="todoCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 20; -fx-padding: 10;">
+                         <VBox fx:id="todoCard" alignment="CENTER" prefHeight="120" prefWidth="140" style="-fx-background-color: #9575CD; -fx-background-radius: 20; -fx-padding: 10; -fx-cursor: hand;">
                             <children>
                                <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="To-Do List" textFill="white" />
                                <Label style="-fx-font-size: 22; -fx-font-weight: bold;" text="View" textFill="white" />

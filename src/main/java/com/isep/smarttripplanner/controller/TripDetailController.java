@@ -3,7 +3,7 @@ package com.isep.smarttripplanner.controller;
 import com.isep.smarttripplanner.model.Trip;
 import com.isep.smarttripplanner.model.Destination;
 import com.isep.smarttripplanner.service.IMapService;
-import com.isep.smarttripplanner.service.GoogleMapsAPI;
+import com.isep.smarttripplanner.service.MapService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -35,7 +35,7 @@ public class TripDetailController {
     private VBox todoCard;
 
     private Trip trip;
-    private final IMapService mapService = new GoogleMapsAPI();
+    private final IMapService mapService = new MapService();
 
     public void setTrip(Trip trip) {
         this.trip = trip;
@@ -56,6 +56,9 @@ public class TripDetailController {
         Destination first = trip.getDestinations().get(0);
         tripMapWebView.getEngine()
                 .loadContent(mapService.getInteractiveMapHtml(first.getLatitude(), first.getLongitude()));
+
+        tripMapWebView.getEngine().setUserAgent(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
         tripMapWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
@@ -150,55 +153,71 @@ public class TripDetailController {
 
             try {
                 com.isep.smarttripplanner.model.AppConfig cfg = cfgRepo.getConfig();
-                String sourceCurrency;
-                if (trip.getCurrency() != null) {
-                    sourceCurrency = trip.getCurrency();
+                String homeCurrency = cfg.getDefaultCurrency();
+                String targetCurrency = cfg.getTargetCurrency();
+                String tripCurrency = trip.getCurrency() != null ? trip.getCurrency() : homeCurrency;
+
+                // Calculate amounts
+                com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
+                java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
+                        .findExpensesByTripId(trip.getId());
+                double totalSpentSrc = expenses.stream().mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount)
+                        .sum();
+                double remainingSrc = trip.getBudget() - totalSpentSrc;
+
+                if (tripCurrency.equals(targetCurrency)) {
+                    updateDetailBudgetUI(trip.getBudget(), remainingSrc, 1.0, targetCurrency);
+                } else if (tripCurrency.equals(homeCurrency)) {
+                    // Trip is Home. Rate = Home -> Target
+                    exService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rate -> {
+                        updateDetailBudgetUI(trip.getBudget(), remainingSrc, rate, targetCurrency);
+                    }).exceptionally(ex -> null);
+                } else if (targetCurrency.equals(homeCurrency)) {
+                    // Target is Home. Rate = Trip -> Home = 1 / (Home -> Trip)
+                    exService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                        double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
+                        updateDetailBudgetUI(trip.getBudget(), remainingSrc, rate, targetCurrency);
+                    }).exceptionally(ex -> null);
                 } else {
-                    sourceCurrency = cfg.getDefaultCurrency();
+                    // Full Triangulation: Trip -> [Home] -> Target
+                    exService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                        exService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rateHomeToTarget -> {
+                            double rate = (rateHomeToTrip == 0) ? 0 : (rateHomeToTarget / rateHomeToTrip);
+                            updateDetailBudgetUI(trip.getBudget(), remainingSrc, rate, targetCurrency);
+                        });
+                    }).exceptionally(ex -> null);
                 }
-                String target = cfg.getTargetCurrency();
 
-                exService.getExchangeRate(sourceCurrency, target).thenAccept(rate -> {
-                    javafx.application.Platform.runLater(() -> {
-                        if (budgetCard.getChildren().size() >= 2) {
-                            com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
-                            java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
-                                    .findExpensesByTripId(trip.getId());
-                            double totalSpentSrc = expenses.stream()
-                                    .mapToDouble(com.isep.smarttripplanner.model.Expense::getAmount).sum();
-                            double remainingSrc = trip.getBudget() - totalSpentSrc;
-
-                            double convertedRemaining = remainingSrc * rate;
-                            double convertedTotal = trip.getBudget() * rate;
-
-                            String sym = target;
-                            try {
-                                sym = java.util.Currency.getInstance(target).getSymbol();
-                            } catch (Exception e) {
-                            }
-                            ((Label) budgetCard.getChildren().get(1)).setText(
-                                    String.format("Rem: %s%.0f / Tot: %s%.0f", sym, convertedRemaining, sym,
-                                            convertedTotal));
-                        }
-                    });
-                }).exceptionally(ex -> {
-                    ex.printStackTrace();
-                    javafx.application.Platform.runLater(() -> {
-                        if (budgetCard.getChildren().size() >= 2) {
-                            ((Label) budgetCard.getChildren().get(1)).setText("Error");
-                        }
-                    });
-                    return null;
-                });
             } catch (Exception e) {
             }
         }
 
-        if (todoCard != null)
-
-        {
+        if (todoCard != null) {
             todoCard.setOnMouseClicked(event -> handleTodoClick());
-            todoCard.setStyle(todoCard.getStyle() + "; -fx-cursor: hand;");
+        }
+
+        if (dayTrackerCard != null) {
+            dayTrackerCard.setOnMouseClicked(event -> handleDailySummary());
+        }
+        if (endDateCard != null) {
+            endDateCard.setOnMouseClicked(event -> handleDailySummary());
+        }
+    }
+
+    private void handleDailySummary() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/isep/smarttripplanner/views/daily-summary-view.fxml"));
+            javafx.scene.Node view = loader.load();
+
+            com.isep.smarttripplanner.controller.SummaryController controller = loader.getController();
+            controller.initData(trip, false);
+
+            com.isep.smarttripplanner.controller.RootController.getInstance().loadView(view);
+        } catch (java.io.IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Failed to load Daily Summary view: " + e.getMessage());
+            alert.show();
         }
     }
 
@@ -433,6 +452,23 @@ public class TripDetailController {
         if (card.getChildren().size() > 1 && card.getChildren().get(1) instanceof Label value) {
             value.setStyle("-fx-font-weight: bold; -fx-font-size: " + (fontSize * 1.4) + "px; -fx-text-fill: white;");
         }
+    }
+
+    private void updateDetailBudgetUI(double budgetSrc, double remainingSrc, double rate, String targetCurrency) {
+        javafx.application.Platform.runLater(() -> {
+            if (budgetCard != null && budgetCard.getChildren().size() >= 2) {
+                double convertedRemaining = remainingSrc * rate;
+                double convertedTotal = budgetSrc * rate;
+
+                String sym = targetCurrency;
+                try {
+                    sym = java.util.Currency.getInstance(targetCurrency).getSymbol();
+                } catch (Exception e) {
+                }
+                ((Label) budgetCard.getChildren().get(1)).setText(
+                        String.format("Rem: %s%.0f / Tot: %s%.0f", sym, convertedRemaining, sym, convertedTotal));
+            }
+        });
     }
 
     @FXML

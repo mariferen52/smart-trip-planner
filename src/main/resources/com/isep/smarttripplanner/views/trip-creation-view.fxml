@@ -16,6 +16,13 @@
                      </children>
                   </VBox>
 
+                  <VBox fx:id="budgetVBox" alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Total Budget" />
+                        <TextField fx:id="budgetInput" promptText="e.g. 1000.00" />
+                     </children>
+                  </VBox>
+
                    <VBox alignment="TOP_RIGHT">
                        <TableView fx:id="destinationsTable">
                            <columns>

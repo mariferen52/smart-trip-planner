@@ -5,62 +5,61 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.isep.smarttripplanner.controller.ProfileController"
-            style="-fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #1e5799 0%, #2989d8 25%, #56c1f5 60%, #87CEEB 100%);">
+            fx:controller="com.isep.smarttripplanner.controller.ProfileController">
     
     <VBox alignment="CENTER" spacing="20" AnchorPane.topAnchor="25.0" AnchorPane.bottomAnchor="25.0" 
           AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0">
         
         <!-- Statistics Header -->
-        <VBox alignment="CENTER" spacing="8">
-            <Label text="📊" style="-fx-font-size: 60px;"/>
+        <VBox alignment="CENTER" spacing="12">
+            <Label text="📊" style="-fx-font-size: 90px;"/>
             <Label text="My Statistics" 
-                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                   style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
         </VBox>
         
         <!-- Stats Cards Row 1 -->
-        <HBox alignment="CENTER" spacing="25">
+        <HBox alignment="CENTER" spacing="38">
             <!-- Total Trips -->
-            <VBox alignment="CENTER" spacing="8" 
-                  style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 20; -fx-padding: 30; -fx-min-width: 180;">
-                <Label text="Total Trips" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            <VBox alignment="CENTER" spacing="12" 
+                  style="-fx-background-color: #90CAF9; -fx-background-radius: 30; -fx-padding: 45; -fx-min-width: 270;">
+                <Label text="Total Trips" style="-fx-font-size: 21px; -fx-text-fill: #333333;"/>
                 <Label fx:id="totalTripsLabel" text="0" 
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                       style="-fx-font-size: 54px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
             </VBox>
             
             <!-- Completed -->
-            <VBox alignment="CENTER" spacing="8" 
-                  style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 20; -fx-padding: 30; -fx-min-width: 180;">
-                <Label text="Completed" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            <VBox alignment="CENTER" spacing="12" 
+                  style="-fx-background-color: #A5D6A7; -fx-background-radius: 30; -fx-padding: 45; -fx-min-width: 270;">
+                <Label text="Completed" style="-fx-font-size: 21px; -fx-text-fill: #333333;"/>
                 <Label fx:id="completedTripsLabel" text="0" 
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4ade80;"/>
+                       style="-fx-font-size: 54px; -fx-font-weight: bold; -fx-text-fill: #1B5E20;"/>
             </VBox>
             
             <!-- Planned -->
-            <VBox alignment="CENTER" spacing="8" 
-                  style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 20; -fx-padding: 30; -fx-min-width: 180;">
-                <Label text="Active Status" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            <VBox alignment="CENTER" spacing="12" 
+                  style="-fx-background-color: #FFF59D; -fx-background-radius: 30; -fx-padding: 45; -fx-min-width: 270;">
+                <Label text="Active Status" style="-fx-font-size: 21px; -fx-text-fill: #333333;"/>
                 <Label fx:id="plannedTripsLabel" text="0" 
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #fbbf24;"/>
+                       style="-fx-font-size: 54px; -fx-font-weight: bold; -fx-text-fill: #F57F17;"/>
             </VBox>
         </HBox>
         
         <!-- Stats Cards Row 2 -->
-        <HBox alignment="CENTER" spacing="25">
+        <HBox alignment="CENTER" spacing="38">
             <!-- Budget Spent -->
-            <VBox alignment="CENTER" spacing="8" 
-                  style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 20; -fx-padding: 30; -fx-min-width: 250;">
-                <Label text="💰 Budget Spent" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            <VBox alignment="CENTER" spacing="12" 
+                  style="-fx-background-color: #CE93D8; -fx-background-radius: 30; -fx-padding: 45; -fx-min-width: 375;">
+                <Label text="💰 Budget Spent" style="-fx-font-size: 21px; -fx-text-fill: #333333;"/>
                 <Label fx:id="totalBudgetLabel" text="0.00" 
-                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                       style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
             </VBox>
             
             <!-- Destinations Visited -->
-            <VBox alignment="CENTER" spacing="8" 
-                  style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 20; -fx-padding: 30; -fx-min-width: 250;">
-                <Label text="📍 Destinations" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            <VBox alignment="CENTER" spacing="12" 
+                  style="-fx-background-color: #FFAB91; -fx-background-radius: 30; -fx-padding: 45; -fx-min-width: 375;">
+                <Label text="📍 Destinations" style="-fx-font-size: 21px; -fx-text-fill: #333333;"/>
                 <Label fx:id="destinationsLabel" text="0" 
-                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                       style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
             </VBox>
         </HBox>
         

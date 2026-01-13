@@ -159,6 +159,11 @@ public class TripCreationController {
         }
     }
 
+    @FXML
+    private TextField budgetInput;
+    @FXML
+    private VBox budgetVBox;
+
     private Trip editingTrip;
 
     public void setTrip(Trip trip) {
@@ -166,6 +171,12 @@ public class TripCreationController {
         tripTitleInput.setText(trip.getTitle());
         destinationList.setAll(trip.getDestinations());
         saveButton.setText("Apply Changes");
+
+        // Hide budget field in edit mode
+        if (budgetVBox != null) {
+            budgetVBox.setVisible(false);
+            budgetVBox.setManaged(false);
+        }
 
         if (tripCreationView.getParent() != null) {
         }
@@ -216,6 +227,18 @@ public class TripCreationController {
             }
         } else {
             double initialBudget = 0.0;
+            if (budgetInput != null && !budgetInput.getText().trim().isEmpty()) {
+                try {
+                    initialBudget = Double.parseDouble(budgetInput.getText().trim());
+                } catch (NumberFormatException e) {
+                    // ignore or warn? user said they want it back, so assuming they want to use it.
+                    // But to avoid blocking flow on bad input (unless critical), I'll default to 0
+                    // or warn.
+                    // Let's explicitly warn if they entered garbage, but default 0 is safe.
+                    // For now, let's keep it simple: try parsing, if fail 0.
+                }
+            }
+
             Trip newTrip = new Trip(title, minDate, maxDate, initialBudget, new java.util.ArrayList<>(destinationList));
 
             try {
