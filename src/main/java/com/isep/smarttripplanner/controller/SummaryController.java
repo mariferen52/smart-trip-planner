@@ -22,9 +22,13 @@ public class SummaryController {
     @FXML
     private Label dateLabel;
     @FXML
-    private Label spentLabel;
+    private Label dailySpentLabel;
     @FXML
-    private Label tasksLabel;
+    private Label totalSpentLabel;
+    @FXML
+    private Label dailyTasksLabel;
+    @FXML
+    private Label totalTasksLabel;
     @FXML
     private ProgressBar progressBar;
     @FXML
@@ -52,32 +56,19 @@ public class SummaryController {
         List<Expense> expenses = expenseRepo.findExpensesByTripId(trip.getId());
         List<TodoItem> todos = todoRepo.findTodosByTripId(trip.getId());
 
-        double totalSpent = 0;
-        if (isFinalDay) {
-            totalSpent = expenses.stream().mapToDouble(Expense::getAmount).sum();
-        } else {
-            totalSpent = expenses.stream()
-                    .filter(e -> e.getDate().equals(today))
-                    .mapToDouble(Expense::getAmount).sum();
-        }
+        double dailySpentVal = expenses.stream()
+                .filter(e -> e.getDate().equals(today))
+                .mapToDouble(Expense::getAmount).sum();
 
-        long completedTasks = 0;
+        double totalSpentVal = expenses.stream()
+                .mapToDouble(Expense::getAmount).sum();
 
-        if (isFinalDay) {
-            completedTasks = todos.stream().filter(TodoItem::isCompleted).count();
-            tasksLabel.setText(completedTasks + " / " + todos.size() + " Done");
-        } else {
-            long dueToday = todos.stream().filter(t -> t.getDueDate() != null && t.getDueDate().equals(today)).count();
-            long completedToday = todos.stream()
-                    .filter(t -> t.getDueDate() != null && t.getDueDate().equals(today) && t.isCompleted()).count();
+        long dueToday = todos.stream().filter(t -> t.getDueDate() != null && t.getDueDate().equals(today)).count();
+        long completedToday = todos.stream()
+                .filter(t -> t.getDueDate() != null && t.getDueDate().equals(today) && t.isCompleted()).count();
 
-            if (dueToday > 0) {
-                tasksLabel.setText(completedToday + " / " + dueToday + " Due Today");
-            } else {
-                long totalDone = todos.stream().filter(TodoItem::isCompleted).count();
-                tasksLabel.setText(totalDone + " Total Done");
-            }
-        }
+        long totalTodos = todos.size();
+        long totalCompleted = todos.stream().filter(TodoItem::isCompleted).count();
 
         String currency = trip.getCurrency() != null ? trip.getCurrency() : "USD";
         String symbol = currency;
@@ -86,7 +77,16 @@ public class SummaryController {
         } catch (Exception e) {
         }
 
-        spentLabel.setText(String.format("%s%.2f", symbol, totalSpent));
+        dailySpentLabel.setText(String.format("%s%.2f", symbol, dailySpentVal));
+        totalSpentLabel.setText(String.format("%s%.2f", symbol, totalSpentVal));
+
+        if (dueToday > 0) {
+            dailyTasksLabel.setText(completedToday + " / " + dueToday + " Done");
+        } else {
+            dailyTasksLabel.setText("No tasks today");
+        }
+
+        totalTasksLabel.setText(totalCompleted + " / " + totalTodos + " Done");
 
         long totalDays = ChronoUnit.DAYS.between(trip.getStartDate(), trip.getTripEndDate()) + 1;
         long daysPassed = ChronoUnit.DAYS.between(trip.getStartDate(), today) + 1;

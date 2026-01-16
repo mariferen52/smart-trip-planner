@@ -30,13 +30,13 @@ public class AppConfigRepository {
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("ALTER TABLE app_config ADD COLUMN target_currency TEXT");
         } catch (SQLException e) {
-            // Ignore if exists
+
         }
 
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("ALTER TABLE app_config ADD COLUMN last_summary_date TEXT");
         } catch (SQLException e) {
-            // Ignore if exists
+
         }
     }
 

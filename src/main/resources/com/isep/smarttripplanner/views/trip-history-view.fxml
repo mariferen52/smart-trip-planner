@@ -8,24 +8,24 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.isep.smarttripplanner.controller.TripHistoryController"
-            style="-fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #1e5799 0%, #2989d8 25%, #56c1f5 60%, #87CEEB 100%);">
+            stylesheets="@trip-history.css">
     
     <VBox spacing="15" AnchorPane.topAnchor="25.0" AnchorPane.bottomAnchor="25.0" 
           AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0">
         
 
         <VBox spacing="5">
-            <Label text="Trip History" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-            <Label text="Your completed adventures" style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.6);"/>
+            <Label text="Trip History" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <Label text="Your completed adventures" style="-fx-font-size: 12px; -fx-text-fill: grey;"/>
         </VBox>
         
 
         <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
             <Label text="🧳" style="-fx-font-size: 48px;"/>
             <Label fx:id="emptyLabel" text="No completed trips yet." 
-                   style="-fx-font-size: 16px; -fx-text-fill: rgba(255,255,255,0.7);"/>
+                   style="-fx-font-size: 16px; -fx-text-fill: grey;"/>
             <Label text="Start your adventure!" 
-                   style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.5);"/>
+                   style="-fx-font-size: 13px; -fx-text-fill: grey;"/>
         </VBox>
         
 

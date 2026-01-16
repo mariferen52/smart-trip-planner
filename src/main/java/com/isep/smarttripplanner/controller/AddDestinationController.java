@@ -27,7 +27,7 @@ public class AddDestinationController {
     private double selectedLat = 48.8566;
     private double selectedLon = 2.3522;
 
-    private final com.isep.smarttripplanner.service.IMapService mapService = new com.isep.smarttripplanner.service.GoogleMapsAPI();
+    private final com.isep.smarttripplanner.service.IMapService mapService = new com.isep.smarttripplanner.service.MapService();
     private final com.isep.smarttripplanner.service.IWeatherService weatherService = new com.isep.smarttripplanner.service.OpenMeteoService();
 
     private java.util.List<javafx.util.Pair<LocalDate, LocalDate>> blockedRanges = new java.util.ArrayList<>();
@@ -39,9 +39,10 @@ public class AddDestinationController {
 
     @FXML
     public void initialize() {
-        String html = mapService.getInteractiveMapHtml(selectedLat, selectedLon);
-        mapWebView.getEngine().loadContent(html);
+        mapWebView.getEngine().setUserAgent(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
+        String html = mapService.getInteractiveMapHtml(selectedLat, selectedLon, 1);
         mapWebView.getEngine().loadContent(html);
 
         mapWebView.getEngine().getLoadWorker().exceptionProperty().addListener((obs, oldExc, newExc) -> {
@@ -49,6 +50,9 @@ public class AddDestinationController {
                 newExc.printStackTrace();
             }
         });
+
+        setupDateCellFactory();
+        setupCityAutoLocation();
 
         mapWebView.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> {
             String script = "try {" +
@@ -62,15 +66,46 @@ public class AddDestinationController {
             mapWebView.getEngine().executeScript(script);
         });
 
-        setupDateCellFactory();
-
         mapWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
                 netscape.javascript.JSObject window = (netscape.javascript.JSObject) mapWebView.getEngine()
                         .executeScript("window");
                 window.setMember("javaApp", this);
-
             }
+        });
+    }
+
+    private void setupCityAutoLocation() {
+        destinationName.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal) {
+                triggerGeocoding(destinationName.getText());
+            }
+        });
+
+        destinationName.setOnAction(e -> triggerGeocoding(destinationName.getText()));
+    }
+
+    private void triggerGeocoding(String city) {
+        if (city == null || city.trim().isEmpty())
+            return;
+
+        weatherService.getCoordinates(city).thenAccept(coords -> {
+            if (coords != null) {
+                javafx.application.Platform.runLater(() -> {
+                    this.selectedLat = coords[0];
+                    this.selectedLon = coords[1];
+
+                    String script = String.format(
+                            "window.map.setView([%f, %f], 10);" +
+                                    "if(window.selectionMarker) { window.selectionMarker.setLatLng([%f, %f]); }" +
+                                    "else { window.selectionMarker = L.marker([%f, %f]).addTo(window.map); }",
+                            selectedLat, selectedLon, selectedLat, selectedLon, selectedLat, selectedLon);
+                    mapWebView.getEngine().executeScript(script);
+
+                });
+            }
+        }).exceptionally(ex -> {
+            return null;
         });
     }
 
@@ -109,12 +144,10 @@ public class AddDestinationController {
         this.selectedLat = lat;
         this.selectedLon = lon;
 
-        weatherService.getForecast(lat, lon).thenAccept(data -> {
+        weatherService.getCityName(lat, lon).thenAccept(name -> {
             javafx.application.Platform.runLater(() -> {
-                if (data.getCityName() != null && !data.getCityName().equals("Unknown City")) {
-                    destinationName.setText(data.getCityName());
-                } else if (data.getArea() != null && !data.getArea().isEmpty()) {
-                    destinationName.setText(data.getArea());
+                if (name != null && !name.equals("Unknown Location")) {
+                    destinationName.setText(name);
                 }
             });
         });

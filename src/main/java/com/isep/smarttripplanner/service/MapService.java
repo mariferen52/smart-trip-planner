@@ -2,30 +2,41 @@ package com.isep.smarttripplanner.service;
 
 import com.isep.smarttripplanner.model.MapView;
 
-public class GoogleMapsAPI implements IMapService {
-    private static final String API_KEY = "YOUR_API_KEY";
+public class MapService implements IMapService {
 
     @Override
     public MapView renderMap(double lat, double lon) {
-        if (API_KEY.equals("YOUR_API_KEY")) {
-
-            return new MapView("data:text/html," + getInteractiveMapHtml(lat, lon));
-        }
-        String mapUrl = "https://www.google.com/maps/embed/v1/view?key=" + API_KEY + "&center=" + lat + "," + lon
-                + "&zoom=12";
-        return new MapView(mapUrl);
+        String html = getInteractiveMapHtml(lat, lon, 10);
+        String base64Html = java.util.Base64.getEncoder()
+                .encodeToString(html.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return new MapView("data:text/html;base64," + base64Html);
     }
 
     @Override
-    public String getInteractiveMapHtml(double lat, double lon) {
+    public String getInteractiveMapHtml(double lat, double lon, int zoom) {
         return "<!DOCTYPE html><html><head>" +
                 "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>" +
                 "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>" +
-                "<style>html, body { height: 100%; margin: 0; padding: 0; } #map { height: 100%; width: 100%; cursor: crosshair; }</style>"
+                "<style>html, body { height: 100%; margin: 0; padding: 0; background: #e0e0e0; } #map { height: 100%; width: 100%; cursor: crosshair; }</style>"
                 +
                 "</head><body><div id='map'></div><script>" +
-                "window.map = L.map('map').setView([" + lat + ", " + lon + "], 5);" +
-                "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.map);" +
+                "L.Browser.any3d = false;" +
+                "L.Browser.retina = false;" +
+
+                "var mapOptions = {" +
+                "   zoomAnimation: false," +
+                "   fadeAnimation: false," +
+                "   markerZoomAnimation: false," +
+                "   preferCanvas: true," +
+                "   zoomControl: false" +
+                "};" +
+                "window.map = L.map('map', mapOptions).setView([" + lat + ", " + lon + "], " + zoom + ");" +
+                "L.control.zoom({position: 'bottomright'}).addTo(window.map);" +
+                "L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {" +
+                "   attribution: '&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors',"
+                +
+                "   maxZoom: 20" +
+                "}).addTo(window.map);" +
                 "var markers = [];" +
                 "var routeLine = null;" +
                 "window.selectionMarker = L.marker([" + lat + ", " + lon + "]).addTo(window.map);" +
@@ -49,14 +60,12 @@ public class GoogleMapsAPI implements IMapService {
                 "}" +
 
                 "function drawRoute(points) {" +
-
                 "  if(routeLine) window.map.removeLayer(routeLine);" +
                 "  routeLine = L.polyline(points, {color: 'blue', weight: 4}).addTo(window.map);" +
                 "}" +
 
                 "// Click handler (Standard)" +
                 "document.addEventListener('click', function(e) {" +
-                "  console.log('Native click at ' + e.clientX + ',' + e.clientY);" +
                 "});" +
 
                 "window.map.on('click', function(e) {" +
@@ -64,10 +73,7 @@ public class GoogleMapsAPI implements IMapService {
                 "  if(selectionMarker) { selectionMarker.setLatLng(coord); }" +
                 "  else { selectionMarker = L.marker(coord).addTo(map); }" +
                 "  if(window.javaApp) {" +
-                "    window.javaApp.log('Map clicked at: ' + coord);" +
                 "    window.javaApp.onLocationSelected(coord.lat, coord.lng);" +
-                "  } else {" +
-                "    alert('CRITICAL ERROR: Java Bridge (javaApp) NOT FOUND. Map clicks will not work.');" +
                 "  }" +
                 "});" +
 

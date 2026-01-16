@@ -38,43 +38,63 @@ public class BudgetController {
     private final com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
     private final com.isep.smarttripplanner.service.ExchangeRateService exchangeService = new com.isep.smarttripplanner.service.ExchangeRateService();
 
+    private String homeCurrency = "USD";
+    private String targetCurrency = "USD";
+
     public void initData(Trip trip) {
         this.currentTrip = trip;
 
-        String homeCurrency = "USD";
-        String targetCurrency = "USD";
-
         try {
             com.isep.smarttripplanner.model.AppConfig config = configRepo.getConfig();
-
-            if (trip.getCurrency() != null) {
-                homeCurrency = config.getDefaultCurrency();
-            }
-
+            homeCurrency = config.getDefaultCurrency();
             targetCurrency = config.getTargetCurrency();
         } catch (Exception e) {
         }
 
         final String fHome = homeCurrency;
         final String fTarget = targetCurrency;
+        final String fTripCurrency = (trip.getCurrency() != null) ? trip.getCurrency() : "USD";
 
         spentLabel.setText("Loading...");
         balanceLabel.setText("converting...");
-
-        exchangeService.getExchangeRate(fHome, fTarget).thenAccept(r -> {
-            javafx.application.Platform.runLater(() -> {
-                double conversionRate = r;
-                updateMultiCurrencyUI(trip, conversionRate, fHome, fTarget);
+        if (fTripCurrency.equals(fHome)) {
+            exchangeService.getExchangeRate(fHome, fTarget).thenAccept(r -> {
+                javafx.application.Platform.runLater(() -> {
+                    updateMultiCurrencyUI(trip, r, fHome, fTarget, 1.0);
+                });
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> updateMultiCurrencyUI(trip, 1.0, fHome, fTarget, 1.0));
+                return null;
             });
-        }).exceptionally(ex -> {
-            ex.printStackTrace();
-            javafx.application.Platform.runLater(() -> updateMultiCurrencyUI(trip, 1.0, fHome, fHome));
-            return null;
-        });
+        } else {
+            exchangeService.getExchangeRate(fHome, fTripCurrency).thenAccept(homeToTripRate -> {
+                double tripToHomeRate = 1.0 / homeToTripRate;
+
+                if (fHome.equals(fTarget)) {
+                    javafx.application.Platform.runLater(() -> {
+                        updateMultiCurrencyUI(trip, 1.0, fHome, fTarget, tripToHomeRate);
+                    });
+                } else {
+                    exchangeService.getExchangeRate(fHome, fTarget).thenAccept(homeToTargetRate -> {
+                        javafx.application.Platform.runLater(() -> {
+                            updateMultiCurrencyUI(trip, homeToTargetRate, fHome, fTarget, tripToHomeRate);
+                        });
+                    }).exceptionally(ex -> {
+                        javafx.application.Platform
+                                .runLater(() -> updateMultiCurrencyUI(trip, 1.0, fHome, fTarget, tripToHomeRate));
+                        return null;
+                    });
+                }
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> updateMultiCurrencyUI(trip, 1.0, fHome, fTarget, 1.0));
+                return null;
+            });
+        }
     }
 
-    private void updateMultiCurrencyUI(Trip trip, double rate, String homeCode, String targetCode) {
-        this.cachedRate = rate;
+    private void updateMultiCurrencyUI(Trip trip, double homeToTargetRate, String homeCode, String targetCode,
+            double tripToHomeRate) {
+        this.cachedRate = homeToTargetRate;
 
         if (budgetCurrencyCombo.getItems().isEmpty()) {
             budgetCurrencyCombo.getItems().clear();
@@ -88,20 +108,27 @@ public class BudgetController {
             budgetCurrencyCombo.setValue(homeCode);
         }
 
-        this.currentBudget = new Budget(trip.getBudget(), homeCode);
+        double convertedBudgetLimit = trip.getBudget() * tripToHomeRate;
+        this.currentBudget = new Budget(convertedBudgetLimit, homeCode);
 
         String symbolTarget = getCurrencySymbol(targetCode);
         String symbolHome = getCurrencySymbol(homeCode);
 
         List<Expense> expenses = expenseRepository.findExpensesByTripId(trip.getId());
 
+        java.util.List<Expense> displayExpenses = new java.util.ArrayList<>();
+
         for (Expense e : expenses) {
-            currentBudget.addExpense(e);
+
+            Expense convertedE = new Expense(e.getId(), e.getTripId(), e.getDescription(),
+                    e.getAmount() * tripToHomeRate, e.getCategory(), e.getDate());
+            currentBudget.addExpense(convertedE);
+            displayExpenses.add(convertedE);
         }
 
         if (expenseListView != null) {
             expenseListView.getItems().clear();
-            expenseListView.getItems().addAll(expenses);
+            expenseListView.getItems().addAll(displayExpenses);
 
             expenseListView.setCellFactory(param -> new ListCell<Expense>() {
                 @Override
@@ -117,7 +144,8 @@ public class BudgetController {
                         javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
                         javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-                        double convertedAmount = item.getAmount() * rate;
+                        double convertedAmount = item.getAmount() * homeToTargetRate;
+
                         String text = String.format("%s: %s%.2f (%s)", item.getDescription(), symbolTarget,
                                 convertedAmount, item.getCategory());
                         Label label = new Label(text);
@@ -138,12 +166,12 @@ public class BudgetController {
         double limitHome = currentBudget.getTotalLimit();
         double balanceHome = currentBudget.getRemainingBalance();
 
-        double spentTarget = spentHome * rate;
-
-        double balanceTarget = balanceHome * rate;
+        double spentTarget = spentHome * homeToTargetRate;
+        double balanceTarget = balanceHome * homeToTargetRate;
 
         spentLabel.setText(String.format("Spent: %s%.2f (%s%.2f)", symbolTarget, spentTarget, symbolHome, spentHome));
-        balanceLabel.setText(String.format("Balance: %s%.2f", symbolTarget, balanceTarget));
+        balanceLabel.setText(
+                String.format("Balance: %s%.2f (%s%.2f)", symbolTarget, balanceTarget, symbolHome, balanceHome));
 
         double progress = limitHome > 0 ? spentHome / limitHome : 0;
         budgetProgressBar.setProgress(Math.min(progress, 1.0));
@@ -184,26 +212,29 @@ public class BudgetController {
     @FXML
     private void handleUpdateLimit() {
         try {
-            double limit = Double.parseDouble(limitField.getText());
-            String selected = budgetCurrencyCombo.getValue();
+            double inputLimit = Double.parseDouble(limitField.getText());
+            String selectedCurrency = budgetCurrencyCombo.getValue();
+            String tripCurrency = currentTrip.getCurrency();
 
-            if (selected != null && !selected.startsWith(currentTrip.getCurrency())) {
-                if (cachedRate > 0) {
-                    limit = limit / cachedRate;
-                }
-            }
-
-            currentTrip.setBudget(limit);
-
-            com.isep.smarttripplanner.repository.TripRepository tripRepo = new com.isep.smarttripplanner.repository.TripRepository();
-            tripRepo.updateTrip(currentTrip);
-
-            initData(currentTrip);
-
-            showAlert("Success", "Budget updated to " + String.format("%.2f %s", limit, currentTrip.getCurrency()));
+            processConversion(inputLimit, selectedCurrency, tripCurrency, convertedLimit -> {
+                javafx.application.Platform
+                        .runLater(() -> updateBudgetInRepo(convertedLimit, inputLimit, selectedCurrency));
+            });
 
         } catch (NumberFormatException e) {
-            showAlert("Invalid Input", "Please enter a valid number.");
+            showAlert("Invalid Input", "Please enter a valid number (use '.' for decimals).");
+        }
+    }
+
+    private void updateBudgetInRepo(double limit, double originalInput, String originalCurrency) {
+        try {
+            currentTrip.setBudget(limit);
+            com.isep.smarttripplanner.repository.TripRepository tripRepo = new com.isep.smarttripplanner.repository.TripRepository();
+            tripRepo.updateTrip(currentTrip);
+            initData(currentTrip);
+
+            String msg = "Budget updated to " + String.format("%.2f %s", originalInput, originalCurrency);
+            showAlert("Success", msg);
         } catch (Exception e) {
             showAlert("Error", "Could not save budget: " + e.getMessage());
         }
@@ -213,29 +244,77 @@ public class BudgetController {
     private void handleAddExpense() {
         try {
             String desc = expenseDescField.getText();
-            double amountTarget = Double.parseDouble(expenseAmountField.getText());
+            double amountInput = Double.parseDouble(expenseAmountField.getText());
             String category = categoryComboBox.getValue();
+            String selectedCurrency = budgetCurrencyCombo.getValue();
+            String tripCurrency = currentTrip.getCurrency();
 
             if (desc == null || desc.isEmpty() || category == null) {
                 showAlert("Missing Info", "Please fill in all expense details.");
                 return;
             }
 
-            double amountHome = amountTarget;
-            if (cachedRate > 0) {
-                amountHome = amountTarget / cachedRate;
-            }
-
-            Expense expense = new Expense(0, currentTrip.getId(), desc, amountHome, category, LocalDate.now());
-            expenseRepository.insertExpense(expense);
-
-            expenseDescField.clear();
-            expenseAmountField.clear();
-
-            initData(currentTrip);
+            processConversion(amountInput, selectedCurrency, tripCurrency, convertedAmount -> {
+                javafx.application.Platform.runLater(() -> saveExpense(desc, convertedAmount, category));
+            });
 
         } catch (NumberFormatException e) {
             showAlert("Invalid Input", "Please enter a valid number for the expense amount.");
+        }
+    }
+
+    private void processConversion(double amount, String selectedCurrency, String tripCurrency,
+            java.util.function.Consumer<Double> callback) {
+        if (selectedCurrency == null || selectedCurrency.equals(tripCurrency)) {
+            callback.accept(amount);
+            return;
+        }
+
+        if (selectedCurrency.equals(homeCurrency)) {
+            exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rate -> {
+                callback.accept(amount * rate);
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> showAlert("Error", "Could not fetch exchange rate."));
+                return null;
+            });
+            return;
+        }
+
+        if (selectedCurrency.equals(targetCurrency)) {
+            exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rToTrip -> {
+                exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rToTarget -> {
+
+                    if (rToTarget == 0)
+                        rToTarget = 1.0;
+                    callback.accept(amount * rToTrip / rToTarget);
+                }).exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() -> showAlert("Error", "Could not fetch exchange rate."));
+                    return null;
+                });
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> showAlert("Error", "Could not fetch exchange rate."));
+                return null;
+            });
+            return;
+        }
+
+        exchangeService.getExchangeRate(selectedCurrency, tripCurrency).thenAccept(rate -> {
+            callback.accept(amount * rate);
+        }).exceptionally(ex -> {
+            javafx.application.Platform.runLater(() -> showAlert("Error", "Could not fetch exchange rate."));
+            return null;
+        });
+    }
+
+    private void saveExpense(String desc, double amount, String category) {
+        try {
+            Expense expense = new Expense(0, currentTrip.getId(), desc, amount, category, LocalDate.now());
+            expenseRepository.insertExpense(expense);
+            expenseDescField.clear();
+            expenseAmountField.clear();
+            initData(currentTrip);
+        } catch (Exception e) {
+            showAlert("Error", "Could not save expense: " + e.getMessage());
         }
     }
 

@@ -74,8 +74,9 @@ public class TripHistoryController {
             if (historyContainer != null) {
                 historyContainer.getChildren().clear();
 
-                for (Trip trip : completedTrips) {
-                    VBox card = createTripCard(trip, userHomeCurrency);
+                for (int i = 0; i < completedTrips.size(); i++) {
+                    Trip trip = completedTrips.get(i);
+                    VBox card = createTripCard(trip, userHomeCurrency, i);
                     historyContainer.getChildren().add(card);
                 }
             }
@@ -84,19 +85,19 @@ public class TripHistoryController {
         }
     }
 
-    private VBox createTripCard(Trip trip, String targetCurrency) {
+    private VBox createTripCard(Trip trip, String targetCurrency, int index) {
         VBox card = new VBox(10);
-        card.setStyle("-fx-background-color: rgba(255,255,255,0.12); -fx-background-radius: 12; -fx-padding: 18;");
+        card.getStyleClass().add("trip-card");
+        card.getStyleClass().add("trip-card-" + (index % 5));
         card.setAlignment(Pos.CENTER_LEFT);
 
         HBox titleRow = new HBox(12);
         titleRow.setAlignment(Pos.CENTER_LEFT);
 
         Label checkIcon = new Label("✅");
-        checkIcon.setStyle("-fx-font-size: 20px;");
 
         Label titleLabel = new Label(trip.getTitle());
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
+        titleLabel.getStyleClass().add("trip-card-title");
 
         titleRow.getChildren().addAll(checkIcon, titleLabel);
 
@@ -106,7 +107,7 @@ public class TripHistoryController {
             dateRange = trip.getStartDate().format(formatter) + " → " + trip.getTripEndDate().format(formatter);
         }
         Label dateLabel = new Label("📅  " + dateRange);
-        dateLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.75);");
+        dateLabel.getStyleClass().add("trip-card-date");
 
         HBox statsRow = new HBox(25);
         statsRow.setAlignment(Pos.CENTER_LEFT);
@@ -114,24 +115,32 @@ public class TripHistoryController {
 
         String tripCurrency = trip.getCurrency() != null ? trip.getCurrency() : "USD";
         Label budgetLabel = new Label(String.format("💰 %s %.0f", tripCurrency, trip.getBudget()));
-        budgetLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4ade80; -fx-font-weight: bold;");
+        budgetLabel.getStyleClass().add("trip-card-budget");
 
+        String userHomeCurrency = "USD";
+        try {
+            userHomeCurrency = configRepo.getConfig().getDefaultCurrency();
+        } catch (Exception e) {
+        }
+        final String homeCurrency = userHomeCurrency;
         if (!tripCurrency.equals(targetCurrency)) {
-            exchangeService.getExchangeRate(tripCurrency, targetCurrency).thenAccept(rate -> {
-                double converted = trip.getBudget() * rate;
-                String symbol = targetCurrency;
-                try {
-                    symbol = java.util.Currency.getInstance(targetCurrency).getSymbol();
-                } catch (Exception e) {
-                }
-
-                final String finalSymbol = symbol;
-                javafx.application.Platform.runLater(() -> {
-                    budgetLabel.setText(String.format("💰 %s %.2f", finalSymbol, converted));
-                });
-            }).exceptionally(ex -> {
-                return null;
-            });
+            if (tripCurrency.equals(homeCurrency)) {
+                exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rate -> {
+                    updateHistoryCardUI(budgetLabel, trip.getBudget(), rate, targetCurrency);
+                }).exceptionally(ex -> null);
+            } else if (targetCurrency.equals(homeCurrency)) {
+                exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                    double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
+                    updateHistoryCardUI(budgetLabel, trip.getBudget(), rate, targetCurrency);
+                }).exceptionally(ex -> null);
+            } else {
+                exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
+                    exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rateHomeToTarget -> {
+                        double rate = (rateHomeToTrip == 0) ? 0 : (rateHomeToTarget / rateHomeToTrip);
+                        updateHistoryCardUI(budgetLabel, trip.getBudget(), rate, targetCurrency);
+                    });
+                }).exceptionally(ex -> null);
+            }
         } else {
             String symbol = tripCurrency;
             try {
@@ -160,18 +169,31 @@ public class TripHistoryController {
             }
 
             Label destLabel = new Label(sb.toString());
-            destLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.85);");
+            destLabel.getStyleClass().add("trip-card-destinations");
             destLabel.setWrapText(true);
 
             statsRow.getChildren().addAll(budgetLabel, destLabel);
         } else {
             Label destLabel = new Label("📍 No destinations");
-            destLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.70);");
+            destLabel.getStyleClass().add("trip-card-destinations");
             statsRow.getChildren().addAll(budgetLabel, destLabel);
         }
 
         card.getChildren().addAll(titleRow, dateLabel, statsRow);
 
         return card;
+    }
+
+    private void updateHistoryCardUI(Label budgetLabel, double budgetSrc, double rate, String targetCurrency) {
+        double converted = budgetSrc * rate;
+        String symbol = targetCurrency;
+        try {
+            symbol = java.util.Currency.getInstance(targetCurrency).getSymbol();
+        } catch (Exception e) {
+        }
+        final String finalSymbol = symbol;
+        javafx.application.Platform.runLater(() -> {
+            budgetLabel.setText(String.format("💰 %s %.2f", finalSymbol, converted));
+        });
     }
 }

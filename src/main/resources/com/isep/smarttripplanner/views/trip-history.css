@@ -1,0 +1,48 @@
+.trip-card {
+    -fx-background-radius: 15;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.trip-card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.trip-card-date {
+    -fx-font-size: 13px;
+    -fx-text-fill: #555555;
+}
+
+.trip-card-budget {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2E7D32;
+}
+
+.trip-card-destinations {
+    -fx-font-size: 13px;
+    -fx-text-fill: #555555;
+    -fx-wrap-text: true;
+}
+
+.trip-card-0 {
+    -fx-background-color: #E3F2FD;
+}
+
+.trip-card-1 {
+    -fx-background-color: #E8F5E9;
+}
+
+.trip-card-2 {
+    -fx-background-color: #FFFDE7;
+}
+
+.trip-card-3 {
+    -fx-background-color: #F3E5F5;
+}
+
+.trip-card-4 {
+    -fx-background-color: #FBE9E7;
+}
