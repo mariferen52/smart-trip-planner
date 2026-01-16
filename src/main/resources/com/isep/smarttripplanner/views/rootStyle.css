@@ -284,3 +284,7 @@
 #tripTitle {
     -fx-padding: 0;
 }
+
+.clickable-card {
+    -fx-cursor: hand;
+}

@@ -24,25 +24,25 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
         </rowConstraints>
         
-        <!-- Daily Spent -->
+
         <VBox spacing="5" style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="0">
             <Label text="Daily Spent" style="-fx-font-weight: bold; -fx-text-fill: #1565c0; -fx-font-size: 12px;"/>
             <Label fx:id="dailySpentLabel" text="\$0.00" style="-fx-font-size: 16px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;"/>
         </VBox>
 
-        <!-- Total Spent -->
+
         <VBox spacing="5" style="-fx-background-color: #e8eaf6; -fx-padding: 15; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="0">
             <Label text="Total Spent" style="-fx-font-weight: bold; -fx-text-fill: #283593; -fx-font-size: 12px;"/>
             <Label fx:id="totalSpentLabel" text="\$0.00" style="-fx-font-size: 16px; -fx-text-fill: #1a237e; -fx-font-weight: bold;"/>
         </VBox>
         
-        <!-- Daily Tasks -->
+
         <VBox spacing="5" style="-fx-background-color: #f1f8e9; -fx-padding: 15; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="1">
             <Label text="Daily Tasks" style="-fx-font-weight: bold; -fx-text-fill: #2e7d32; -fx-font-size: 12px;"/>
             <Label fx:id="dailyTasksLabel" text="0 Done" style="-fx-font-size: 16px; -fx-text-fill: #1b5e20; -fx-font-weight: bold;"/>
         </VBox>
 
-        <!-- Total Tasks -->
+
         <VBox spacing="5" style="-fx-background-color: #f9fbe7; -fx-padding: 15; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <Label text="Total Tasks" style="-fx-font-weight: bold; -fx-text-fill: #827717; -fx-font-size: 12px;"/>
             <Label fx:id="totalTasksLabel" text="0 Done" style="-fx-font-size: 16px; -fx-text-fill: #33691e; -fx-font-weight: bold;"/>

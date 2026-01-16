@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import com.isep.smarttripplanner.repository.AppConfigRepository;
+import com.isep.smarttripplanner.model.AppConfig;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -53,12 +55,31 @@ public class TripCreationController {
     @FXML
     private Button cancelButton;
 
+    @FXML
+    private ComboBox<String> homeCurrencyCombo;
+    @FXML
+    private ComboBox<String> targetCurrencyCombo;
+
     private final ObservableList<Destination> destinationList = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
         if (tripCreationView == null) {
             return;
+        }
+
+        if (homeCurrencyCombo != null && targetCurrencyCombo != null) {
+            String[] currencies = { "USD", "EUR", "TRY", "GEL", "INR" };
+            homeCurrencyCombo.getItems().addAll(currencies);
+            targetCurrencyCombo.getItems().addAll(currencies);
+
+            try {
+                AppConfigRepository configRepo = new AppConfigRepository();
+                AppConfig config = configRepo.getConfig();
+                homeCurrencyCombo.setValue(config.getDefaultCurrency());
+                targetCurrencyCombo.setValue(config.getTargetCurrency());
+            } catch (Exception e) {
+            }
         }
 
         destinationsTable.setItems(destinationList);
@@ -172,7 +193,6 @@ public class TripCreationController {
         destinationList.setAll(trip.getDestinations());
         saveButton.setText("Apply Changes");
 
-        // Hide budget field in edit mode
         if (budgetVBox != null) {
             budgetVBox.setVisible(false);
             budgetVBox.setManaged(false);
@@ -194,6 +214,17 @@ public class TripCreationController {
         if (destinationList.isEmpty()) {
             showAlert("Validation Error", "Please add at least one destination.");
             return;
+        }
+
+        try {
+            if (homeCurrencyCombo != null && targetCurrencyCombo != null) {
+                AppConfigRepository configRepo = new AppConfigRepository();
+                AppConfig config = configRepo.getConfig();
+                config.setDefaultCurrency(homeCurrencyCombo.getValue());
+                config.setTargetCurrency(targetCurrencyCombo.getValue());
+                configRepo.saveConfig(config);
+            }
+        } catch (Exception e) {
         }
 
         LocalDate minDate = null;
@@ -231,19 +262,18 @@ public class TripCreationController {
                 try {
                     initialBudget = Double.parseDouble(budgetInput.getText().trim());
                 } catch (NumberFormatException e) {
-                    // ignore or warn? user said they want it back, so assuming they want to use it.
-                    // But to avoid blocking flow on bad input (unless critical), I'll default to 0
-                    // or warn.
-                    // Let's explicitly warn if they entered garbage, but default 0 is safe.
-                    // For now, let's keep it simple: try parsing, if fail 0.
                 }
             }
 
             Trip newTrip = new Trip(title, minDate, maxDate, initialBudget, new java.util.ArrayList<>(destinationList));
 
             try {
-                com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
-                newTrip.setCurrency(configRepo.getConfig().getDefaultCurrency());
+                if (homeCurrencyCombo != null && homeCurrencyCombo.getValue() != null) {
+                    newTrip.setCurrency(homeCurrencyCombo.getValue());
+                } else {
+                    com.isep.smarttripplanner.repository.AppConfigRepository configRepo = new com.isep.smarttripplanner.repository.AppConfigRepository();
+                    newTrip.setCurrency(configRepo.getConfig().getDefaultCurrency());
+                }
             } catch (Exception e) {
                 newTrip.setCurrency("USD");
             }
@@ -256,6 +286,7 @@ public class TripCreationController {
                 showAlert("Error", "Could not save trip: " + e.getMessage());
             }
         }
+
     }
 
     @FXML

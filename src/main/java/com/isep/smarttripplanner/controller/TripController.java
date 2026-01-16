@@ -116,7 +116,7 @@ public class TripController {
                                 String.format("Tot: %s%.0f", symbol, currentActiveTrip.getBudget()));
                     });
                 } else if (tripCurrency.equals(widgetBaseCurrency)) {
-                    // Trip is Home. Rate = Home -> Target
+
                     exchangeService.getExchangeRate(widgetBaseCurrency, targetCurrency).thenAccept(rate -> {
                         javafx.application.Platform.runLater(() -> {
                             updateBudgetCardUI(currentActiveTrip.getBudget(), remainingSrc, rate, targetCurrency);
@@ -126,7 +126,7 @@ public class TripController {
                         return null;
                     });
                 } else if (targetCurrency.equals(widgetBaseCurrency)) {
-                    // Target is Home. Rate = Trip -> Home = 1 / (Home -> Trip)
+
                     exchangeService.getExchangeRate(widgetBaseCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
                         double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
                         javafx.application.Platform.runLater(() -> {
@@ -208,7 +208,33 @@ public class TripController {
                         } catch (Exception e) {
                         }
                     });
-                    weatherCard.setStyle(weatherCard.getStyle() + "; -fx-cursor: hand;");
+
+                    if (currencyCard != null) {
+                        currencyCard.setOnMouseClicked(event -> {
+                            RootController.getInstance().showSettingsView();
+                        });
+                    }
+                    if (budgetCard != null) {
+                        budgetCard.setOnMouseClicked(event -> {
+                            try {
+                                FXMLLoader loader = new FXMLLoader(
+                                        getClass().getResource("/com/isep/smarttripplanner/views/budget-view.fxml"));
+                                javafx.scene.Node view = loader.load();
+
+                                com.isep.smarttripplanner.controller.BudgetController controller = loader
+                                        .getController();
+                                controller.initData(currentActiveTrip);
+
+                                homeView.getChildren().setAll(view);
+                                AnchorPane.setTopAnchor(view, 0.0);
+                                AnchorPane.setBottomAnchor(view, 0.0);
+                                AnchorPane.setLeftAnchor(view, 0.0);
+                                AnchorPane.setRightAnchor(view, 0.0);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
 
                     com.isep.smarttripplanner.model.Destination firstDest = currentActiveTrip.getDestinations().get(0);
                     weatherService.getForecast(firstDest.getLatitude(), firstDest.getLongitude())

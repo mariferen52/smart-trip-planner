@@ -283,7 +283,7 @@ public class BudgetController {
         if (selectedCurrency.equals(targetCurrency)) {
             exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rToTrip -> {
                 exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rToTarget -> {
-                    // Prevent division by zero
+
                     if (rToTarget == 0)
                         rToTarget = 1.0;
                     callback.accept(amount * rToTrip / rToTarget);

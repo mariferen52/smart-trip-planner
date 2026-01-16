@@ -56,7 +56,6 @@ public class SummaryController {
         List<Expense> expenses = expenseRepo.findExpensesByTripId(trip.getId());
         List<TodoItem> todos = todoRepo.findTodosByTripId(trip.getId());
 
-        // 1. Calculate Spent
         double dailySpentVal = expenses.stream()
                 .filter(e -> e.getDate().equals(today))
                 .mapToDouble(Expense::getAmount).sum();
@@ -64,7 +63,6 @@ public class SummaryController {
         double totalSpentVal = expenses.stream()
                 .mapToDouble(Expense::getAmount).sum();
 
-        // 2. Calculate Tasks
         long dueToday = todos.stream().filter(t -> t.getDueDate() != null && t.getDueDate().equals(today)).count();
         long completedToday = todos.stream()
                 .filter(t -> t.getDueDate() != null && t.getDueDate().equals(today) && t.isCompleted()).count();
@@ -72,7 +70,6 @@ public class SummaryController {
         long totalTodos = todos.size();
         long totalCompleted = todos.stream().filter(TodoItem::isCompleted).count();
 
-        // 3. Format Currency
         String currency = trip.getCurrency() != null ? trip.getCurrency() : "USD";
         String symbol = currency;
         try {
@@ -80,7 +77,6 @@ public class SummaryController {
         } catch (Exception e) {
         }
 
-        // 4. Set Text
         dailySpentLabel.setText(String.format("%s%.2f", symbol, dailySpentVal));
         totalSpentLabel.setText(String.format("%s%.2f", symbol, totalSpentVal));
 

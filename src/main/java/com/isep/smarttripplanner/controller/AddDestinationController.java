@@ -42,7 +42,7 @@ public class AddDestinationController {
         mapWebView.getEngine().setUserAgent(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
-        String html = mapService.getInteractiveMapHtml(selectedLat, selectedLon);
+        String html = mapService.getInteractiveMapHtml(selectedLat, selectedLon, 1);
         mapWebView.getEngine().loadContent(html);
 
         mapWebView.getEngine().getLoadWorker().exceptionProperty().addListener((obs, oldExc, newExc) -> {
@@ -102,7 +102,6 @@ public class AddDestinationController {
                             selectedLat, selectedLon, selectedLat, selectedLon, selectedLat, selectedLon);
                     mapWebView.getEngine().executeScript(script);
 
-                    // No need to fetch city name or weather, as user typed it.
                 });
             }
         }).exceptionally(ex -> {

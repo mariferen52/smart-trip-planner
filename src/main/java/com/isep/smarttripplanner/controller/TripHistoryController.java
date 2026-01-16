@@ -125,18 +125,15 @@ public class TripHistoryController {
         final String homeCurrency = userHomeCurrency;
         if (!tripCurrency.equals(targetCurrency)) {
             if (tripCurrency.equals(homeCurrency)) {
-                // Trip is Home. Rate = Home -> Target
                 exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rate -> {
                     updateHistoryCardUI(budgetLabel, trip.getBudget(), rate, targetCurrency);
                 }).exceptionally(ex -> null);
             } else if (targetCurrency.equals(homeCurrency)) {
-                // Target is Home. Rate = Trip -> Home = 1 / (Home -> Trip)
                 exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
                     double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
                     updateHistoryCardUI(budgetLabel, trip.getBudget(), rate, targetCurrency);
                 }).exceptionally(ex -> null);
             } else {
-                // Full Triangulation: Trip -> [Home] -> Target
                 exchangeService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
                     exchangeService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rateHomeToTarget -> {
                         double rate = (rateHomeToTrip == 0) ? 0 : (rateHomeToTarget / rateHomeToTrip);

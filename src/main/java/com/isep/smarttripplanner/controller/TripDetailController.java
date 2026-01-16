@@ -49,13 +49,13 @@ public class TripDetailController {
 
     private void initializeMap() {
         if (trip.getDestinations() == null || trip.getDestinations().isEmpty()) {
-            tripMapWebView.getEngine().loadContent(mapService.getInteractiveMapHtml(48.8566, 2.3522));
+            tripMapWebView.getEngine().loadContent(mapService.getInteractiveMapHtml(48.8566, 2.3522, 13));
             return;
         }
 
         Destination first = trip.getDestinations().get(0);
         tripMapWebView.getEngine()
-                .loadContent(mapService.getInteractiveMapHtml(first.getLatitude(), first.getLongitude()));
+                .loadContent(mapService.getInteractiveMapHtml(first.getLatitude(), first.getLongitude(), 13));
 
         tripMapWebView.getEngine().setUserAgent(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -157,7 +157,6 @@ public class TripDetailController {
                 String targetCurrency = cfg.getTargetCurrency();
                 String tripCurrency = trip.getCurrency() != null ? trip.getCurrency() : homeCurrency;
 
-                // Calculate amounts
                 com.isep.smarttripplanner.repository.ExpenseRepository expRepo = new com.isep.smarttripplanner.repository.ExpenseRepository();
                 java.util.List<com.isep.smarttripplanner.model.Expense> expenses = expRepo
                         .findExpensesByTripId(trip.getId());
@@ -168,18 +167,15 @@ public class TripDetailController {
                 if (tripCurrency.equals(targetCurrency)) {
                     updateDetailBudgetUI(trip.getBudget(), remainingSrc, 1.0, targetCurrency);
                 } else if (tripCurrency.equals(homeCurrency)) {
-                    // Trip is Home. Rate = Home -> Target
                     exService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rate -> {
                         updateDetailBudgetUI(trip.getBudget(), remainingSrc, rate, targetCurrency);
                     }).exceptionally(ex -> null);
                 } else if (targetCurrency.equals(homeCurrency)) {
-                    // Target is Home. Rate = Trip -> Home = 1 / (Home -> Trip)
                     exService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
                         double rate = (rateHomeToTrip == 0) ? 0 : (1.0 / rateHomeToTrip);
                         updateDetailBudgetUI(trip.getBudget(), remainingSrc, rate, targetCurrency);
                     }).exceptionally(ex -> null);
                 } else {
-                    // Full Triangulation: Trip -> [Home] -> Target
                     exService.getExchangeRate(homeCurrency, tripCurrency).thenAccept(rateHomeToTrip -> {
                         exService.getExchangeRate(homeCurrency, targetCurrency).thenAccept(rateHomeToTarget -> {
                             double rate = (rateHomeToTrip == 0) ? 0 : (rateHomeToTarget / rateHomeToTrip);

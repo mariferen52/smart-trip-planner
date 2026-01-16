@@ -6,14 +6,14 @@ public class MapService implements IMapService {
 
     @Override
     public MapView renderMap(double lat, double lon) {
-        String html = getInteractiveMapHtml(lat, lon);
+        String html = getInteractiveMapHtml(lat, lon, 10);
         String base64Html = java.util.Base64.getEncoder()
                 .encodeToString(html.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         return new MapView("data:text/html;base64," + base64Html);
     }
 
     @Override
-    public String getInteractiveMapHtml(double lat, double lon) {
+    public String getInteractiveMapHtml(double lat, double lon, int zoom) {
         return "<!DOCTYPE html><html><head>" +
                 "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>" +
                 "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>" +
@@ -30,7 +30,7 @@ public class MapService implements IMapService {
                 "   preferCanvas: true," +
                 "   zoomControl: false" +
                 "};" +
-                "window.map = L.map('map', mapOptions).setView([" + lat + ", " + lon + "], 5);" +
+                "window.map = L.map('map', mapOptions).setView([" + lat + ", " + lon + "], " + zoom + ");" +
                 "L.control.zoom({position: 'bottomright'}).addTo(window.map);" +
                 "L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {" +
                 "   attribution: '&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors',"

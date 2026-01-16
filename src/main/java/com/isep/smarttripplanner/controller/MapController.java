@@ -65,7 +65,6 @@ public class MapController {
                         .executeScript("window");
                 window.setMember("javaApp", this);
 
-                // Console logging
                 mapWebView.getEngine().executeScript("console.log = function(message) { javaApp.log(message); }");
             }
         });
@@ -103,7 +102,7 @@ public class MapController {
     }
 
     private void loadMap(double lat, double lon) {
-        String html = mapService.getInteractiveMapHtml(lat, lon);
+        String html = mapService.getInteractiveMapHtml(lat, lon, 1);
         mapWebView.getEngine().loadContent(html);
 
         weatherService.getForecast(lat, lon).thenAccept(data -> {

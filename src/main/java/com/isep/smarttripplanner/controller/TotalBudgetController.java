@@ -91,8 +91,8 @@ public class TotalBudgetController {
             totals[0] += convertedBudget;
             totals[1] += convertedSpent;
 
-            Label tripLabel = new Label(String.format("%s: Spent %s%.2f / Budget %s%.2f (Rate: %.2f)",
-                    trip.getTitle(), symbol, convertedSpent, symbol, convertedBudget, rate));
+            Label tripLabel = new Label(String.format("%s: Spent %s%.2f / Budget %s%.2f",
+                    trip.getTitle(), symbol, convertedSpent, symbol, convertedBudget));
             tripSummaryContainer.getChildren().add(tripLabel);
 
             processedCount[0]++;

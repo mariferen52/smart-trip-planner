@@ -21,15 +21,14 @@
                   </VBox>
                   <VBox maxWidth="-Infinity" maxHeight="-Infinity" fx:id="activeTripContainer" alignment="CENTER_LEFT" spacing="20.0" visible="false">
                      <children>
-                              <Label onMouseClicked="#openTripDetails" fx:id="tripTitle" text="New York" style="-fx-cursor: hand;">
-                                 <tooltip><Tooltip text="Click to view details"/></tooltip>
+                              <Label fx:id="tripTitle" text="New York">
                                  <graphic>
 
                                  </graphic>
                               </Label>
                         <HBox maxHeight="-Infinity" maxWidth="-Infinity" fx:id="widgetsContainer" alignment="CENTER_LEFT" spacing="15.0">
                            <children>
-                              <VBox fx:id="currencyCard" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #7986CB; -fx-background-radius: 15; -fx-padding: 15;">
+                              <VBox fx:id="currencyCard" styleClass="clickable-card" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #7986CB; -fx-background-radius: 15; -fx-padding: 15;">
                                  <children>
                                     <Label style="-fx-font-weight: bold;" text="€ → $" textFill="white" />
                                     <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="1.08" textFill="white" />
@@ -37,7 +36,7 @@
                                  </children>
                               </VBox>
 
-                              <VBox  fx:id="budgetCard" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #E57373; -fx-background-radius: 15; -fx-padding: 15;">
+                              <VBox  fx:id="budgetCard" styleClass="clickable-card" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #E57373; -fx-background-radius: 15; -fx-padding: 15;">
                                  <children>
                                     <Label style="-fx-font-weight: bold;" text="Budget" textFill="white" />
                                     <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="--" textFill="white" />
@@ -53,7 +52,7 @@
                                  </children>
                               </VBox>
 
-                              <VBox fx:id="weatherCard" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #4DB6AC; -fx-background-radius: 15; -fx-padding: 15;">
+                              <VBox fx:id="weatherCard" styleClass="clickable-card" alignment="CENTER" minHeight="120" minWidth="120" style="-fx-background-color: #4DB6AC; -fx-background-radius: 15; -fx-padding: 15;">
                                  <children>
                                      <Label style="-fx-font-weight: bold;" text="Weather" textFill="white" />
                                     <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="--" textFill="white" />

@@ -216,6 +216,14 @@ public class RootController {
         loadView("/com/isep/smarttripplanner/views/total-budget-view.fxml");
     }
 
+    public void showSettingsView() {
+        showSettings();
+    }
+
+    public void showBudgetView() {
+        showTotalBudget();
+    }
+
     private void setLabelSize(Label button, Region buttonIcon, double fontSize) {
         double padding = fontSize / 1.5;
         buttonIcon.setStyle("-fx-min-height: " + fontSize + "px; " +

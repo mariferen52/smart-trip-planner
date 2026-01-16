@@ -17,7 +17,7 @@
     <VBox spacing="5" alignment="CENTER" AnchorPane.topAnchor="15.0" AnchorPane.bottomAnchor="0.0" 
           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         
-        <!-- City Header -->
+
         <VBox styleClass="city-header" alignment="CENTER">
             <padding><Insets left="30" right="30"/></padding>
             <HBox spacing="8" alignment="CENTER">
@@ -27,7 +27,7 @@
             <Label fx:id="updateTimeLabel" text="Updated just now" styleClass="update-time"/>
         </VBox>
         
-        <!-- Main Temperature Display -->
+
         <HBox styleClass="temp-main-container" alignment="CENTER" spacing="20">
             <padding><Insets left="30" right="30"/></padding>
             <ImageView fx:id="weatherIconView" fitWidth="100" fitHeight="100" preserveRatio="true" styleClass="weather-icon-large"/>
@@ -38,7 +38,7 @@
             </VBox>
         </HBox>
         
-        <!-- Weather Details Row -->
+
         <HBox alignment="CENTER">
             <padding><Insets left="20" right="20" bottom="10"/></padding>
             <HBox styleClass="details-card" spacing="5" alignment="CENTER">
@@ -65,16 +65,16 @@
             </HBox>
         </HBox>
         
-        <!-- Spacer -->
+
         <VBox VBox.vgrow="ALWAYS"/>
         
-        <!-- Daily Forecast Section -->
+
         <VBox styleClass="forecast-section" alignment="CENTER" spacing="10" VBox.vgrow="NEVER">
             <Label text="Daily forecast" styleClass="forecast-title"/>
             <javafx.scene.control.ScrollPane fitToHeight="true" fitToWidth="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <content>
                      <HBox fx:id="forecastContainer" alignment="CENTER" spacing="15" style="-fx-padding: 0 0 10 0;">
-                        <!-- Forecast items added dynamically -->
+
                      </HBox>
                 </content>
             </javafx.scene.control.ScrollPane>
